@@ -166,7 +166,7 @@ int main(int argn, char *argv[]){
             }
             c=(int)tmp;
 
-            if(c > m || c<0){
+            if(c > m+1 || c<0){
                 printf("c deve essere un intero positivo minore di m\n");
                 print_help();
                 return 0;
@@ -206,7 +206,7 @@ int main(int argn, char *argv[]){
 
         if(rd>0){
             for(i=0;i<len_parti;i++){
-                
+
                 caratteri[rff[i]]++;
             }
         }
@@ -221,8 +221,7 @@ int main(int argn, char *argv[]){
     char outName[12];
 
     strcpy(outName,"q");
-    sprintf(outName,"%s%d%d.txt",outName,n,m);
-
+    sprintf(outName,"%s%d%d%d.txt",outName,n,m,c);
     //
     //controlli?
     //
