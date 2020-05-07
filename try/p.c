@@ -42,13 +42,6 @@ int main(int argc, char *argv[]) {
     char * paths[argc-6];//numero di files specificati
     int contr_arg[3] = {0,0,0};
 
-
-    //primi controlli sugli argomenti
-    if(argc == 1){
-        printf("argomento input non trovato\n");
-        return 0;
-    }
-
     //controlli e lettura dei parametri
     for(i=1;i<argc;i++){
         int controllo = 0;
@@ -164,7 +157,7 @@ int main(int argc, char *argv[]) {
         char arg_m[10];
         char arg_c[10];
 
-        sprintf(arg_n,"%d",(n*10)+i);
+        sprintf(arg_n,"%d%d",n,i);
         sprintf(arg_m,"%d",m);
         sprintf(arg_c,"%d",tmp_m);
         printf("%s %s %s\n",arg_n,arg_m,arg_c);
