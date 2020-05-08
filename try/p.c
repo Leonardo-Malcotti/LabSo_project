@@ -2,7 +2,13 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
-
+#include <assert.h>
+#include <ctype.h>
+#include <fcntl.h>
+#include <float.h>
+#include <signal.h>
+#include <string.h>
+#include <unistd.h>
 /*
 o si trova il modo di rendere -m e -n obbligatori
 o si trova il modo di non dover specificare la lunghezza di paths
@@ -22,6 +28,9 @@ void print_help(){
 #define ARG_N 0
 #define ARG_M 1
 #define ARG_F 2
+#define WRITE_P 1
+#define READ_P 0
+
 
 int main(int argc, char *argv[]) {
     int i;//indice per i for
@@ -140,18 +149,56 @@ int main(int argc, char *argv[]) {
     //fa un fork per ogni file
     int pid= -1;
     int tmp_m=1;
+    int pipes[(argc-6)*m][2];
+    int map_pipes[(argc-6)*m];
+    int c_pipes =0;
+
     for(i=0; i<argc-6 && pid!=0;i++){
         tmp_m=1;
         //printf("%s\n",paths[i]);
         while(pid!=0 && tmp_m<=m){
+
+            pipe(pipes[c_pipes]);
+            printf("pipe %d creata\n",c_pipes);
             pid = fork();
-            tmp_m++;
+
+            if(pid!=0){
+                map_pipes[c_pipes]=pid;
+                c_pipes++;
+                tmp_m++;
+            }
         }
     }
     //printf("%d %d %d\n",n,i,tmp_m);
 
+    int caratteri[256]={[0 ... 255]=0};
+
     if(pid!=0){
-        wait(NULL);
+        for(i=0; i<c_pipes ;i++){
+            close(pipes[i][WRITE_P]);
+        }
+        for(i=0; i<c_pipes ;i++){
+            int ret_pid=wait(NULL);
+            printf("processo %d ha terminato\n",ret_pid);
+            int j=0;
+            int k=-1;
+            for(j=0;j<c_pipes && k==-1;j++){
+                if(ret_pid==map_pipes[j]){
+                    k=j;
+                }
+            }
+            printf("legge dal canale del figlio %d \n",ret_pid);
+            for(j=0;j<256;j++){
+
+            //forse da controllare
+
+                char buff[sizeof(int)];
+                read(pipes[k][READ_P],&buff,sizeof(int));
+                //printf("%s\n",buff);
+                caratteri[j]+=atoi(buff);
+            }
+            close(pipes[k][READ_P]);
+        }
     } else{
         char arg_n[10];
         char arg_m[10];
@@ -160,9 +207,21 @@ int main(int argc, char *argv[]) {
         sprintf(arg_n,"%d%d",n,i);
         sprintf(arg_m,"%d",m);
         sprintf(arg_c,"%d",tmp_m);
-        printf("%s %s %s\n",arg_n,arg_m,arg_c);
-        printf("%s\n",paths[i-1]);
+        //printf("%s %s %s\n",arg_n,arg_m,arg_c);
+        //printf("%s\n",paths[i-1]);
+        close(pipes[c_pipes][READ_P]);
+        dup2(pipes[c_pipes][WRITE_P],4);
         execlp("./q","q","-f",paths[i-1],"-n",arg_n,"-m",arg_m,"-c",arg_c,NULL);
+        //system("echo errore");
+        return -1;
     }
+
+
+    printf("si stampa\n");
+    int j=0;
+    for(j=0;j<256;j++){
+        printf("%d %d\n",j,caratteri[j]);
+    }
+
     return 0;
 }

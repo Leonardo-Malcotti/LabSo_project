@@ -2,8 +2,13 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <ctype.h>
 #include <fcntl.h>
-
+#include <float.h>
+#include <signal.h>
+#include <string.h>
+#include <unistd.h>
 /*
 prende in input un file .txt e scrive un file qnm.txt
 inserendo il numero di ricorrenze dei caratteri ascii
@@ -79,7 +84,7 @@ int main(int argn, char *argv[]){
             }
 
             finput = open(argv[i+1],O_RDWR);
-
+            printf("file n %d\n",finput);
             if(finput < 0){
                 //
                 //inserire controllo errori
@@ -166,7 +171,7 @@ int main(int argn, char *argv[]){
             }
             c=(int)tmp;
 
-            if(c > m+1 || c<0){
+            if(c > m || c<0){
                 printf("c deve essere un intero positivo minore di m\n");
                 print_help();
                 return 0;
@@ -200,13 +205,15 @@ int main(int argn, char *argv[]){
         }
     } else{
         int len_parti = len_file/m;
+        len_parti=(len_parti<1)? 1: len_parti;
+
         lseek(finput,(c-1)*len_parti,SEEK_SET);
 
         rd = read(finput,rff,len_parti);
 
         if(rd>0){
             for(i=0;i<len_parti;i++){
-
+                //printf("%c",rff[i]);
                 caratteri[rff[i]]++;
             }
         }
@@ -216,7 +223,7 @@ int main(int argn, char *argv[]){
     //fflush(finput);
 
     close(finput);
-
+/*
     //nome del file di output
     char outName[12];
 
@@ -226,14 +233,17 @@ int main(int argn, char *argv[]){
     //controlli?
     //
     FILE *out = fopen(outName,"w+");
-
+*/
     for(i=0;i<256;i++){
-        fprintf(out,"%d %d\n",i,caratteri[i]);
+        char buff[sizeof(caratteri[i])];
+        sprintf(buff,"%d",caratteri[i]);
+        write(4,buff,sizeof(caratteri[i]));
+        //printf("%d\n",caratteri[i]);
     }
+    close(4);
+    //fflush(out);
+    //fclose(out);
 
-    fflush(out);
-    fclose(out);
-    fflush(NULL);
-
+    printf("fine %d\n",getpid());
     return 0;
 }
