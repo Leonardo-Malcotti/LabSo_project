@@ -9,27 +9,14 @@
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
+#include "projectLib.h"
 /*
 o si trova il modo di rendere -m e -n obbligatori
 o si trova il modo di non dover specificare la lunghezza di paths
 */
 
-void print_help(){
-    printf("\n");
-    printf("-f  indica il percorso del file di input.\n");
-    printf("-n  indica il numero del gruppo di file.\n");
-    printf("    se non specificato n sarà 0 di default.\n");
-    printf("-m  indica il numero di parti in cui il file verrà suddiviso.\n");
-    printf("    se non specificato sarà 0, quindi verrà analizzato tutto il file.\n");
-    printf("\n");
-}
 
 
-#define ARG_N 0
-#define ARG_M 1
-#define ARG_F 2
-#define WRITE_P 1
-#define READ_P 0
 
 
 int main(int argc, char *argv[]) {
@@ -60,7 +47,7 @@ int main(int argc, char *argv[]) {
             //controlla che non sia stato usato più volte
             if(contr_arg[ARG_N]!= 0){
                 printf("hai usato -n troppe volte\n");
-                print_help();
+                print_p_help();
                 return 0;
             } else {
                 contr_arg[ARG_N] = 1;
@@ -89,7 +76,7 @@ int main(int argc, char *argv[]) {
             //controlla che non sia stato usato più volte
             if(contr_arg[ARG_M]!= 0){
                 printf("hai usato -m troppe volte\n");
-                print_help();
+                print_p_help();
                 return 0;
             } else {
                 contr_arg[ARG_M] = 1;
@@ -117,7 +104,7 @@ int main(int argc, char *argv[]) {
             //controlla che non sia stato usato più volte
             if(contr_arg[ARG_F]!= 0){
                 printf("hai usato -f troppe volte\n");
-                print_help();
+                print_p_help();
                 return 0;
             } else {
                 contr_arg[ARG_F] = 1;
@@ -190,7 +177,7 @@ int main(int argc, char *argv[]) {
             printf("legge dal canale del figlio %d \n",ret_pid);
             for(j=0;j<256;j++){
 
-            //forse da controllare
+            //forse da con
 
                 char buff[sizeof(int)];
                 read(pipes[k][READ_P],&buff,sizeof(int));
