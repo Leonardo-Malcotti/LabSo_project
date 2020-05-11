@@ -11,6 +11,9 @@
 #include <unistd.h>
 #include "projectLib.h"
 
+char *arr_param[] = {"-n","-m","-f","-c"};
+
+
 void print_p_help(){
     printf("\n");
     printf("-f  indica il percorso del file di input.\n");
@@ -32,4 +35,18 @@ void print_q_help(){
     printf("-c  indica quale parte analizzare, se a 0 analizza tutto il file.\n");
     printf("    se non specificato sarà 0.\n");
     printf("\n");
+}
+
+int param_check(char *arg,int arg_type,int arr_check[]){
+    if(strcmp(arg,arr_param[arg_type]) == 0){
+        if(arr_check[arg_type]!= 0){
+            printf("hai usato %s troppe volte\n",arr_param[arg_type]);
+            //print_p_help();
+            return -1;
+        } else {
+            arr_check[arg_type] = 1;
+            return 0;
+        }
+    }
+    return -1;
 }

@@ -43,8 +43,10 @@ int main(int argc, char *argv[]) {
         int controllo = 0;
         //legge dai parametri il valore di n
         //controllando che l'input si effettivamente un numero
-        if(strcmp(argv[i],"-n") == 0){
+        //if(strcmp(argv[i],"-n") == 0){
+        if(param_check(argv[i],ARG_N,contr_arg) == 0){
             //controlla che non sia stato usato più volte
+            /*
             if(contr_arg[ARG_N]!= 0){
                 printf("hai usato -n troppe volte\n");
                 print_p_help();
@@ -52,7 +54,7 @@ int main(int argc, char *argv[]) {
             } else {
                 contr_arg[ARG_N] = 1;
             }
-
+            */
             //segnala che è stato letto un parametro valido
             controllo =1;
 
