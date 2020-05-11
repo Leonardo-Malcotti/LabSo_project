@@ -11,7 +11,9 @@
 #include <unistd.h>
 #include "projectLib.h"
 
+
 char *arr_param[] = {"-n","-m","-f","-c"};
+
 
 void print_p_help(){
     printf("\n");
@@ -23,6 +25,7 @@ void print_p_help(){
     printf("\n");
 }
 
+
 void print_q_help(){
     printf("\n");
     printf("parametri\n\n");
@@ -30,11 +33,12 @@ void print_q_help(){
     printf("-n  indica il numero del gruppo di file.\n");
     printf("    se non specificato n sarà 0 di default.\n");
     printf("-m  indica il numero di parti in cui il file è da suddividere.\n");
-    printf("    se non specificato sarà 0, quindi verrà analizzato tutto il file.\n");
+    printf("    deve essere un numero positivo diverso da 0, se non specificato darà errore\n");
     printf("-c  indica quale parte analizzare, se a 0 analizza tutto il file.\n");
     printf("    se non specificato sarà 0.\n");
     printf("\n");
 }
+
 
 int param_check(char *arg,int arg_type,int arr_check[]){
     if(strcmp(arg,arr_param[arg_type]) == 0){
@@ -48,4 +52,34 @@ int param_check(char *arg,int arg_type,int arr_check[]){
         }
     }
     return -1;
+}
+
+
+int str_to_int(char * arg){
+    char *err;
+    long int tmp = strtol(arg,&err,10);
+    if(*err){
+        printf("errore nella conversione della stringa\n");
+        return -1;
+    }
+    if(tmp<0){
+        printf("numero risultante negativo\n");
+        return -1;
+    }
+    return (int)tmp;
+}
+
+
+int open_file(char * arg,int *len){
+    int tmp = open(arg,O_RDWR);
+    if(tmp < 0){
+        //
+        //inserire controllo errori
+        //
+        printf("errore nel file passato\n");
+        return -1;
+    }
+    len = lseek(finput,0,SEEK_END);
+    lseek(finput,0,SEEK_SET);
+    return tmp;
 }

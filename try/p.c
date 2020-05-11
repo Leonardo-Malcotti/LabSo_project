@@ -40,44 +40,29 @@ int main(int argc, char *argv[]) {
 
     //controlli e lettura dei parametri
     for(i=1;i<argc;i++){
-        int controllo = 0;
-        //legge dai parametri il valore di n
-        //controllando che l'input si effettivamente un numero
-        if(param_check(argv[i],ARG_N,contr_arg) == 0){
 
+        //viene posto ad 1 se viene letto un parametro corretto
+        int controllo = 0;
+
+        //lettura parametro -n con dovuti controlli
+        if(param_check(argv[i],ARG_N,contr_arg) == 0){
             //segnala che è stato letto un parametro valido
             controllo =1;
-
-            char *err;
-            long int tmp = strtol(argv[i+1],&err,10);
-            if(strcmp(err,"")!=0){
-                //
-                //inserire istruzioni sul comando
-                //
-                printf("erroneo utilizzo degli argomenti 2\n");
-                return 0;
+            if(n = str_to_int(argv[i+1]) == -1){
+                //stampa errori
+                exit(-1);
             }
-            n=(int)tmp;
             i++;
         }
 
-        //legge dai parametri il valore di m
-        //controllando che l'input si effettivamente un numero
+        //lettura parametro -m con dovuti controlli
         if(param_check(argv[i],ARG_M,contr_arg) == 0){
-
             //segnala che è stato letto un parametro valido
             controllo =1;
-
-            char *err;
-            long int tmp = strtol(argv[i+1],&err,10);
-            if(*err){
-                //
-                //inserire istruzioni sul comando
-                //
-                printf("erroneo utilizzo degli argomenti 3\n");
-                return 0;
+            if(m = str_to_int(argv[i+1]) == -1){
+                //stampa errori
+                exit(-1);
             }
-            m=(int)tmp;
             i++;
         }
 
@@ -103,7 +88,7 @@ int main(int argc, char *argv[]) {
 
         if(controllo == 0){
             printf("parametri non validi\n");
-            return 0;
+            exit(-1);
         }
     }
 
@@ -156,7 +141,7 @@ int main(int argc, char *argv[]) {
                 char buff[sizeof(int)];
                 read(pipes[k][READ_P],&buff,sizeof(int));
                 //printf("%s\n",buff);
-                caratteri[j]+=atoi(buff);
+                caratteri[j]+=str_to_int(buff);
             }
             close(pipes[k][READ_P]);
         }
@@ -171,7 +156,7 @@ int main(int argc, char *argv[]) {
         //printf("%s %s %s\n",arg_n,arg_m,arg_c);
         //printf("%s\n",paths[i-1]);
         close(pipes[c_pipes][READ_P]);
-        dup2(pipes[c_pipes][WRITE_P],4);
+        dup2(pipes[c_pipes][WRITE_P],PIPE_CHANNEL);
         execlp("./q","q","-f",paths[i-1],"-n",arg_n,"-m",arg_m,"-c",arg_c,NULL);
         //system("echo errore");
         return -1;
