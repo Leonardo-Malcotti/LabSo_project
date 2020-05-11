@@ -13,7 +13,6 @@
 
 char *arr_param[] = {"-n","-m","-f","-c"};
 
-
 void print_p_help(){
     printf("\n");
     printf("-f  indica il percorso del file di input.\n");

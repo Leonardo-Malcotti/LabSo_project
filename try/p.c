@@ -43,18 +43,8 @@ int main(int argc, char *argv[]) {
         int controllo = 0;
         //legge dai parametri il valore di n
         //controllando che l'input si effettivamente un numero
-        //if(strcmp(argv[i],"-n") == 0){
         if(param_check(argv[i],ARG_N,contr_arg) == 0){
-            //controlla che non sia stato usato più volte
-            /*
-            if(contr_arg[ARG_N]!= 0){
-                printf("hai usato -n troppe volte\n");
-                print_p_help();
-                return 0;
-            } else {
-                contr_arg[ARG_N] = 1;
-            }
-            */
+
             //segnala che è stato letto un parametro valido
             controllo =1;
 
@@ -73,16 +63,7 @@ int main(int argc, char *argv[]) {
 
         //legge dai parametri il valore di m
         //controllando che l'input si effettivamente un numero
-        if(strcmp(argv[i],"-m") == 0){
-
-            //controlla che non sia stato usato più volte
-            if(contr_arg[ARG_M]!= 0){
-                printf("hai usato -m troppe volte\n");
-                print_p_help();
-                return 0;
-            } else {
-                contr_arg[ARG_M] = 1;
-            }
+        if(param_check(argv[i],ARG_M,contr_arg) == 0){
 
             //segnala che è stato letto un parametro valido
             controllo =1;
@@ -101,16 +82,7 @@ int main(int argc, char *argv[]) {
         }
 
         //legge i valori del parametro -f
-        if(strcmp(argv[i],"-f") == 0){
-
-            //controlla che non sia stato usato più volte
-            if(contr_arg[ARG_F]!= 0){
-                printf("hai usato -f troppe volte\n");
-                print_p_help();
-                return 0;
-            } else {
-                contr_arg[ARG_F] = 1;
-            }
+        if(param_check(argv[i],ARG_F,contr_arg) == 0){
 
             //segnala che è stato letto un parametro valido
             controllo =1;

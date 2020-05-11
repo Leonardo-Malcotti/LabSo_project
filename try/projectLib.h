@@ -3,7 +3,7 @@
 
 void print_q_help();
 void print_p_help();
-
+int param_check(char *arg,int arg_type,int arr_check[]);
 #define ARG_N 0
 #define ARG_M 1
 #define ARG_F 2
@@ -11,6 +11,5 @@ void print_p_help();
 
 #define WRITE_P 1
 #define READ_P 0
-
 
 #endif

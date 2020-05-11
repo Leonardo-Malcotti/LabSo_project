@@ -56,16 +56,7 @@ int main(int argn, char *argv[]){
 
         //apre il file indicato nei parametri
         //gestisce eventuali errori
-        if(strcmp(argv[i],"-f")==0){
-
-            //controlla che l'argomento non sia stato già usato
-            if(contr_arg[ARG_F]!= 0){
-                printf("hai usato -f troppe volte\n");
-                print_q_help();
-                return 0;
-            } else {
-                contr_arg[ARG_F] = 1;
-            }
+        if(param_check(argv[i],ARG_F,contr_arg) == 0){
 
             finput = open(argv[i+1],O_RDWR);
             printf("file n %d\n",finput);
@@ -83,15 +74,7 @@ int main(int argn, char *argv[]){
 
         //legge dai parametri il valore di n
         //controllando che l'input si effettivamente un numero
-        if(strcmp(argv[i],"-n") == 0){
-
-            if(contr_arg[ARG_N]!= 0){
-                printf("hai usato -n troppe volte\n");
-                print_q_help();
-                return 0;
-            } else {
-                contr_arg[ARG_N] = 1;
-            }
+        if(param_check(argv[i],ARG_N,contr_arg) == 0){
 
             char *err;
             long int tmp = strtol(argv[i+1],&err,10);
@@ -108,15 +91,7 @@ int main(int argn, char *argv[]){
 
         //legge dai parametri il valore di m
         //controllando che l'input si effettivamente un numero
-        if(strcmp(argv[i],"-m") == 0){
-
-            if(contr_arg[ARG_M]!= 0){
-                printf("hai usato -m troppe volte\n");
-                print_q_help();
-                return 0;
-            } else {
-                contr_arg[ARG_M] = 1;
-            }
+        if(param_check(argv[i],ARG_M,contr_arg) == 0){
 
             char *err;
             long int tmp = strtol(argv[i+1],&err,10);
@@ -133,15 +108,7 @@ int main(int argn, char *argv[]){
 
         //legge dai parametri il valore di c
         //controllando che l'input si effettivamente un numero
-        if(strcmp(argv[i],"-c") == 0){
-
-            if(contr_arg[ARG_C]!= 0){
-                printf("hai usato -c troppe volte\n");
-                print_q_help();
-                return 0;
-            } else {
-                contr_arg[ARG_C] = 1;
-            }
+        if(param_check(argv[i],ARG_C,contr_arg) == 0){
 
             char *err;
             long int tmp = strtol(argv[i+1],&err,10);
