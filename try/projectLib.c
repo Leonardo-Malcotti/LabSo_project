@@ -79,7 +79,7 @@ int open_file(char * arg,int *len){
         printf("errore nel file passato\n");
         return -1;
     }
-    len = lseek(finput,0,SEEK_END);
-    lseek(finput,0,SEEK_SET);
+    *len = lseek(tmp,0,SEEK_END);
+    lseek(tmp,0,SEEK_SET);
     return tmp;
 }

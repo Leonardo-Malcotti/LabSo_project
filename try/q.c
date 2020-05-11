@@ -61,7 +61,7 @@ int main(int argc, char *argv[]){
         //gestisce eventuali errori
         if(param_check(argv[i],ARG_F,contr_arg) == 0){
             controllo = 1;
-            if(finput = open_file(argv[i+1],&len_file) == -1){
+            if((finput = open_file(argv[i+1],&len_file)) == -1){
                 //stampa errori
                 exit(-1);
             }
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]){
         //lettura parametro -n con dovuti controlli
         if(param_check(argv[i],ARG_N,contr_arg) == 0){
             controllo = 1;
-            if(n = str_to_int(argv[i+1]) == -1){
+            if((n = str_to_int(argv[i+1])) == -1){
                 //stampa errori
                 exit(-1);
             }
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]){
         //lettura parametro -m con dovuti controlli
         if(param_check(argv[i],ARG_M,contr_arg) == 0){
             controllo = 1;
-            if(m = str_to_int(argv[i+1]) == -1){
+            if((m = str_to_int(argv[i+1])) == -1){
                 //stampa errori
                 exit(-1);
             }
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]){
         //lettura parametro -c con dovuti controlli
         if(param_check(argv[i],ARG_C,contr_arg) == 0){
             controllo = 1;
-            if(c=str_to_int(argv[i+1]) == -1){
+            if((c=str_to_int(argv[i+1])) == -1){
                 //stampa errori
                 exit(-1);
             }

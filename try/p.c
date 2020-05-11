@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
         if(param_check(argv[i],ARG_N,contr_arg) == 0){
             //segnala che è stato letto un parametro valido
             controllo =1;
-            if(n = str_to_int(argv[i+1]) == -1){
+            if((n = str_to_int(argv[i+1])) == -1){
                 //stampa errori
                 exit(-1);
             }
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
         if(param_check(argv[i],ARG_M,contr_arg) == 0){
             //segnala che è stato letto un parametro valido
             controllo =1;
-            if(m = str_to_int(argv[i+1]) == -1){
+            if((m = str_to_int(argv[i+1])) == -1){
                 //stampa errori
                 exit(-1);
             }
