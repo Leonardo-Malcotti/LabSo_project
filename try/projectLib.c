@@ -9,6 +9,11 @@
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h​>
+#include <sys/types.h​>
+#include <sys/wait.h​>
+#include <sys/msg.h​>
+#include <sys/ipc.h​>
 #include "projectLib.h"
 
 
@@ -71,7 +76,9 @@ int str_to_int(char * arg){
 
 
 int open_file(char * arg,int *len){
+    struct stat buff;
     int tmp = open(arg,O_RDWR);
+    test(arg,&buff);
     if(tmp < 0){
         //
         //inserire controllo errori
@@ -79,7 +86,19 @@ int open_file(char * arg,int *len){
         printf("errore nel file passato\n");
         return -1;
     }
-    *len = lseek(tmp,0,SEEK_END);
-    lseek(tmp,0,SEEK_SET);
+    *len = (int)buff.st_size;
     return tmp;
+}
+
+int is_dir(char * arg){
+    struct stat buff;
+    int contr = test(arg,&buff);
+    if(contr<0){
+        //
+        //controlli
+        //
+        return -1;
+    } else {
+        return S_ISDIR(buff.st_mode);
+    }
 }

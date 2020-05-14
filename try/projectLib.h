@@ -15,6 +15,9 @@ int str_to_int(char * arg);
 //apre il file specificato (arg) e salva la lunghezza del contenuto (len)
 //ritorna -1 ad errore, il descrittore del file se ha successo
 int open_file(char * arg,int *len);
+//controlla che il path (arg) sia una directory
+//ritorna 0 se è un file, 1 se è una directory e -1 se c'è stato qualche errore
+int is_dir(char * arg);
 
 #define ARG_N 0
 #define ARG_M 1
