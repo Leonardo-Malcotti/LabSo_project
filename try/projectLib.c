@@ -44,6 +44,12 @@ void print_q_help(){
     printf("\n");
 }
 
+void print_r_help(){
+    printf("\n");
+    printf("parametri\n\n");
+    printf("-f  indica il percorso del file di input.\n");
+    printf("\n");
+}
 
 int param_check(char *arg,int arg_type,int arr_check[]){
     if(strcmp(arg,arr_param[arg_type]) == 0){
