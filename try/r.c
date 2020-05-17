@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include "projectlib.h"
+#include "projectLib.h"
 
 #define COUNT 1 //Quanti byte leggere ad ogni read
 /*
@@ -14,7 +14,7 @@ ascii ricorrenza \n
 
 */
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) {
     int i;          //iteratore per cicli
     int finput;     //File Descriptor da inizializzare con il file in input
     int len_file;   //Lunghezza del file 'descritto' da finput
@@ -55,6 +55,6 @@ int main(int argc, char *argv[]){
 
     
 
-
+    close(finput);
     return 0;
 }
