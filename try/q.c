@@ -16,6 +16,7 @@
 #include <sys/ipc.h>
 #include <limits.h>
 #include "projectLib.h"
+
 /*
 prende in input un file .txt e scrive un file qnm.txt
 inserendo il numero di ricorrenze dei caratteri ascii

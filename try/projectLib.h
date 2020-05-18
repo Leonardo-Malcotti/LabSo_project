@@ -54,5 +54,5 @@ int pipe_system_command(int pip[2],char *command);
 #define READ_P 0
 
 #define PIPE_CHANNEL 4
-
+#define COSTANTE_LIMITE_TEMPORANEA 100
 #endif

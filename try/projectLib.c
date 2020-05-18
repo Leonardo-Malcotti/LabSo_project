@@ -9,13 +9,14 @@
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/stat.h​>
-#include <sys/types.h​>
-#include <sys/wait.h​>
-#include <sys/msg.h​>
-#include <sys/ipc.h​>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/msg.h>
+#include <sys/ipc.h>
+#include <limits.h>
+#include <math.h>
 #include "projectLib.h"
-
 
 char *arr_param[] = {"-n","-m","-f","-c"};
 
@@ -84,7 +85,7 @@ int str_to_int(char * arg){
 int open_file(char * arg,int *len){
     struct stat buff;
     int tmp = open(arg,O_RDWR);
-    test(arg,&buff);
+    stat(arg,&buff);
     if(tmp < 0){
         //
         //inserire controllo errori
@@ -98,7 +99,7 @@ int open_file(char * arg,int *len){
 
 int is_dir(char * arg){
     struct stat buff;
-    int contr = test(arg,&buff);
+    int contr = stat(arg,&buff);
     if(contr<0){
         //
         //controlli
@@ -176,10 +177,32 @@ int files_in_dir(char * path){
     strcpy(command,"ls ");
     strcat(command,path);
     strcat(command," | wc -l");
+    printf("%s\n",command);
+
+    fflush(NULL);
     int contr = pipe_system_command(pip,command);
+
     if(contr<0){
         return -1;
     }
+    
     close(pip[WRITE_P]);
+    char buf[COSTANTE_LIMITE_TEMPORANEA];
+    int len_buf;
+    contr = read_until_n(pip[READ_P],buf,&len_buf);
+    close(pip[READ_P]);
 
+    printf("%s\n",buf);
+    printf("%d\n",len_buf);
+    printf("%lu\n",strlen(buf));
+    double ret = 0,j=0;
+    int i=0;
+    for(i=strlen(buf);i>0;i--){
+        printf("%c\n",buf[i]);
+        int n=atoi(&buf[i]);
+        if(n!=0){
+            ret = ret + n*(pow(10,j));
+        }
+    }
+    return (int)ret;
 }
