@@ -150,7 +150,36 @@ int pipe_system_command(int pip[2],char *command){
     return 0;
 }
 
+int read_until_n(int des,char *buf, int *len){
+    int rd=0;
+    int c=0;
+    do{
+        char buf2[1];
+        rd=read(des,buf2,1);
+        if(*buf2=='\n'){
+            *len=c;
+            return 0;
+        } else {
+            strcat(buf,buf2);
+            c++;
+        }
+    }while(rd>0);
+    return -1;
+}
 
 int files_in_dir(char * path){
+    //
+    //fare controllo sulla dir?
+    //
+    int pip[2];
+    char command[strlen(path)+11];//ls path | wc -l
+    strcpy(command,"ls ");
+    strcat(command,path);
+    strcat(command," | wc -l");
+    int contr = pipe_system_command(pip,command);
+    if(contr<0){
+        return -1;
+    }
+    close(pip[WRITE_P]);
 
 }
