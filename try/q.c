@@ -14,6 +14,7 @@
 #include <sys/wait.h>
 #include <sys/msg.h>
 #include <sys/ipc.h>
+#include <limits.h>
 #include "projectLib.h"
 /*
 prende in input un file .txt e scrive un file qnm.txt
@@ -115,6 +116,7 @@ int main(int argc, char *argv[]){
         }
     }
 
+    printf("pid: %d m: %d c: %d \n",getpid(),m,c);
     //
     //Analisi del file
     //

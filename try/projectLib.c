@@ -9,11 +9,12 @@
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/stat.h​>
-#include <sys/types.h​>
-#include <sys/wait.h​>
-#include <sys/msg.h​>
-#include <sys/ipc.h​>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/msg.h>
+#include <sys/ipc.h>
+#include <limits.h>
 #include "projectLib.h"
 
 
@@ -78,7 +79,7 @@ int str_to_int(char * arg){
 int open_file(char * arg,int *len){
     struct stat buff;
     int tmp = open(arg,O_RDWR);
-    test(arg,&buff);
+    stat(arg,&buff);
     if(tmp < 0){
         //
         //inserire controllo errori
@@ -92,7 +93,7 @@ int open_file(char * arg,int *len){
 
 int is_dir(char * arg){
     struct stat buff;
-    int contr = test(arg,&buff);
+    int contr = stat(arg,&buff);
     if(contr<0){
         //
         //controlli
@@ -101,4 +102,86 @@ int is_dir(char * arg){
     } else {
         return S_ISDIR(buff.st_mode);
     }
+}
+
+//
+//ste due funzioni sono migliorabili nella loro logica
+//NOTA: si può usare SEEK_CUR per fare lo spostamento relativo alla posizione corrente
+//
+
+int file_len(int des){
+    int ret = lseek(des,0,SEEK_END);
+    lseek(des,0,SEEK_SET);
+    return ret;
+}
+
+
+int file_len2(int des, int pos){
+    int ret = lseek(des,0,SEEK_END);
+    lseek(des,pos,SEEK_SET);
+    return ret;
+}
+
+
+int read_until_n(int des,char *buf, int *len){
+    int rd=0;
+    int c=0;
+    do{
+        char buf2[1];
+        rd=read(des,buf2,1);
+        if(*buf2=='\n'){
+            *len=c;
+            return 0;
+        } else {
+            strcat(buf,buf2);
+            c++;
+        }
+    }while(rd!=0);
+    return -1;
+}
+
+int pipe_system_command(int pip[2],char *command){
+    int contr = 0;
+    contr=pipe(pip);
+    if(contr<0){
+        //
+        //errori
+        //
+        return contr;
+    }
+    int std = dup(STDOUT_FILENO);
+    if(std<0){
+        //
+        //errori
+        //
+        return std;
+    }
+    contr=dup2(pip[WRITE_P],STDOUT_FILENO);
+    if(contr<0){
+        //
+        //errori
+        //
+        return contr;
+    }
+    contr=system(command);
+    if(contr<0){
+        //
+        //errori
+        //
+        return contr;
+    }
+    fflush(NULL);
+    contr=dup2(std,STDOUT_FILENO);
+    if(contr<0){
+        //
+        //errori
+        //
+        return contr;
+    }
+    return 0;
+}
+
+
+int files_in_dir(char * path){
+    
 }

@@ -14,6 +14,7 @@
 #include <sys/wait.h>
 #include <sys/msg.h>
 #include <sys/ipc.h>
+#include <limits.h>
 #include "projectLib.h"
 /*
 o si trova il modo di rendere -m e -n obbligatori
@@ -110,9 +111,12 @@ int main(int argc, char *argv[]) {
         while(pid!=0 && tmp_m<=m){
 
             pipe(pipes[c_pipes]);
-            printf("pipe %d creata\n",c_pipes);
+            //printf("pipe %d creata\n",c_pipes);
             pid = fork();
-
+            if(pid<0){
+                printf("\n%s\n",strerror(errno));
+                exit(-1);
+            }
             if(pid!=0){
                 map_pipes[c_pipes]=pid;
                 c_pipes++;
@@ -123,14 +127,15 @@ int main(int argc, char *argv[]) {
     //printf("%d %d %d\n",n,i,tmp_m);
 
     int caratteri[256]={[0 ... 255]=0};
-
     if(pid!=0){
+        printf("numero pipes %d\n",c_pipes );
         for(i=0; i<c_pipes ;i++){
             close(pipes[i][WRITE_P]);
         }
         for(i=0; i<c_pipes ;i++){
+            printf("ciclo %d",i);
             int ret_pid=wait(NULL);
-            printf("processo %d ha terminato\n",ret_pid);
+            //printf("processo %d ha terminato\n",ret_pid);
             int j=0;
             int k=-1;
             for(j=0;j<c_pipes && k==-1;j++){
@@ -138,7 +143,7 @@ int main(int argc, char *argv[]) {
                     k=j;
                 }
             }
-            printf("legge dal canale del figlio %d \n",ret_pid);
+            //printf("legge dal canale del figlio %d \n",ret_pid);
             for(j=0;j<256;j++){
 
             //forse da con
@@ -151,9 +156,9 @@ int main(int argc, char *argv[]) {
             close(pipes[k][READ_P]);
         }
     } else{
-        char arg_n[10];
-        char arg_m[10];
-        char arg_c[10];
+        char arg_n[30];
+        char arg_m[30];
+        char arg_c[30];
 
         sprintf(arg_n,"%d%d",n,i);
         sprintf(arg_m,"%d",m);
@@ -171,7 +176,12 @@ int main(int argc, char *argv[]) {
     printf("si stampa\n");
     int j=0;
     for(j=0;j<256;j++){
-        printf("%d %d\n",j,caratteri[j]);
+        int g=0;
+        for(g=0;g<8;g++){
+            printf("%5d %5d ",j,caratteri[j]);
+            j++;
+        }
+        printf("\n");
     }
 
     return 0;
