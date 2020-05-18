@@ -4,7 +4,7 @@
 //stampa una guida all'utilizzo dei comandi
 void print_q_help();
 void print_p_help();
-
+void print_r_help();
 //verifica che la stringa passara (arg) corrisponda al parametro specificato (arg_type)(vedere arr_param)
 //controlla che il parametro non venga usato più volte (arr_check)
 //ritorna -1 ad errore, 0 a successo
