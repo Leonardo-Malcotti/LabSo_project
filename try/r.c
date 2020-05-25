@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include "projectLib.h"
+//#include "projectLib.h"
 
 #define COUNT 1 //Quanti byte leggere ad ogni read
 /*
@@ -13,6 +13,62 @@ il formato del file di input è:
 ascii ricorrenza \n
 
 */
+/*Visto che da problemi copio tutte le funzioni da projectLib.c e projectLib.h qui e tolgo l'import*/
+
+#include <errno.h>
+#include <assert.h>
+#include <ctype.h>
+#include <float.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/msg.h>
+#include <sys/ipc.h>
+#include <limits.h>
+#include <math.h>
+
+#define ARG_F 2
+
+char *arr_param[] = {"-n","-m","-f","-c"};
+
+
+void print_r_help(){
+    printf("\n");
+    printf("parametri\n\n");
+    printf("-f  indica il percorso del file di input.\n");
+    printf("\n");
+}
+
+int param_check(char *arg,int arg_type,int arr_check[]){
+    if(strcmp(arg,arr_param[arg_type]) == 0){
+        if(arr_check[arg_type]!= 0){
+            printf("hai usato %s troppe volte\n",arr_param[arg_type]);
+            //print_p_help();
+            return -1;
+        } else {
+            arr_check[arg_type] = 1;
+            return 0;
+        }
+    }
+    return -1;
+}
+
+int open_file(char * arg,int *len){
+    struct stat buff;
+    int tmp = open(arg,O_RDWR);
+    stat(arg,&buff);
+    if(tmp < 0){
+        //
+        //inserire controllo errori
+        //
+        printf("errore nel file passato\n");
+        return -1;
+    }
+    *len = (int)buff.st_size;
+    return tmp;
+}
+/*qui finiscono le cose importate temporaneamente*/
 
 int main(int argc, char *argv[]) {
     int i;          //iteratore per cicli
