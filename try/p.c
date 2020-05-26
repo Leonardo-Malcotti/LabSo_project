@@ -128,12 +128,12 @@ int main(int argc, char *argv[]) {
 
     int caratteri[256]={[0 ... 255]=0};
     if(pid!=0){
-        printf("numero pipes %d\n",c_pipes );
+        //printf("numero pipes %d\n",c_pipes );
         for(i=0; i<c_pipes ;i++){
             close(pipes[i][WRITE_P]);
         }
         for(i=0; i<c_pipes ;i++){
-            printf("ciclo %d",i);
+            //printf("ciclo %d",i);
             int ret_pid=wait(NULL);
             //printf("processo %d ha terminato\n",ret_pid);
             int j=0;
@@ -173,15 +173,15 @@ int main(int argc, char *argv[]) {
     }
 
 
-    printf("si stampa\n");
+
     int j=0;
     for(j=0;j<256;j++){
-        int g=0;
-        for(g=0;g<8;g++){
-            printf("%5d %5d ",j,caratteri[j]);
-            j++;
-        }
-        printf("\n");
+        //int g=0;
+        //for(g=0;g<8;g++){
+            printf("%d %d\n",j,caratteri[j]);
+            //j++;
+        //}
+        //printf("\n");
     }
 
     return 0;

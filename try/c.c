@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
                     int len_str;
                     char buf[NAME_MAX];
                     strcpy(buf,"");
-                    j =read_until_n(tmp_pipe[READ_P],buf,&len_str);
+                    j =read_until_char(tmp_pipe[READ_P],'\n',buf,&len_str);
 
                     if(j==0){
                         //

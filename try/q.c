@@ -117,7 +117,7 @@ int main(int argc, char *argv[]){
         }
     }
 
-    printf("pid: %d m: %d c: %d \n",getpid(),m,c);
+    //printf("pid: %d m: %d c: %d \n",getpid(),m,c);
     //
     //Analisi del file
     //

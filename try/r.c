@@ -1,24 +1,14 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
-#include <fcntl.h>
-//#include "projectLib.h"
-
-#define COUNT 1 //Quanti byte leggere ad ogni read
-/*
-prende in input un file .txt e ne stampa a video il report, fornendo statistiche.
-il formato del file di input �:
-ascii ricorrenza \n
-
-*/
-/*Visto che da problemi copio tutte le funzioni da projectLib.c e projectLib.h qui e tolgo l'import*/
-
 #include <errno.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
+#include <fcntl.h>
 #include <float.h>
 #include <signal.h>
+#include <string.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -26,89 +16,62 @@ ascii ricorrenza \n
 #include <sys/ipc.h>
 #include <limits.h>
 #include <math.h>
-
-#define ARG_F 2
-
-char *arr_param[] = {"-n","-m","-f","-c"};
-
-
-void print_r_help(){
-    printf("\n");
-    printf("parametri\n\n");
-    printf("-f  indica il percorso del file di input.\n");
-    printf("\n");
-}
-
-int param_check(char *arg,int arg_type,int arr_check[]){
-    if(strcmp(arg,arr_param[arg_type]) == 0){
-        if(arr_check[arg_type]!= 0){
-            printf("hai usato %s troppe volte\n",arr_param[arg_type]);
-            //print_p_help();
-            return -1;
-        } else {
-            arr_check[arg_type] = 1;
-            return 0;
-        }
-    }
-    return -1;
-}
-
-int open_file(char * arg,int *len){
-    struct stat buff;
-    int tmp = open(arg,O_RDWR);
-    stat(arg,&buff);
-    if(tmp < 0){
-        //
-        //inserire controllo errori
-        //
-        printf("errore nel file passato\n");
-        return -1;
-    }
-    *len = (int)buff.st_size;
-    return tmp;
-}
-/*qui finiscono le cose importate temporaneamente*/
+#include "projectLib.h"
 
 int main(int argc, char *argv[]) {
-    int i;          //iteratore per cicli
-    int finput;     //File Descriptor da inizializzare con il file in input
-    int len_file;   //Lunghezza del file 'descritto' da finput
-    int *buff;      //Buffer in cui salvo i dati letti
+    int i;//indice per i for
+    int finput,len_file;
 
-//Step 1: Gestione dell'argomento in ingresso e creazione del File Descriptor
-
-    if(argc == 1){
-        printf("argomento input non trovato\n");
-        print_r_help();
-        exit(-1);
-    }
-    if(argc > 3){
-        printf("troppi argomenti specificati\n");
+    //primi controlli sui parametri
+    if(argc != 3){
+        printf("utilizzo erroneo dei parametri\n");
         print_r_help();
         exit(-1);
     }
 
-    int contr_arg[4] = {1,1,0,1}; //Accetto solo un argomento di tipo -f
-    for(i=1;i<argc;i++){
-       //apre il file indicato nei parametri
-        //gestisce eventuali errori
-        if(param_check(argv[i],ARG_F,contr_arg) == 0){
-            //controllo = 1;
-            if((finput = open_file(argv[i+1],&len_file)) == -1){
-                //stampa errori
-                exit(-1);
-            }
+    //r accetta solo il parametro -f, con un valore che deve essere un file
+    if(strcmp(argv[1],"-f") == 0){
+        if((finput=open_file(argv[2],&len_file))==-1){
+            //stampa errori
+            exit(-1);
         }
     }
 
-//Step 2: lettura da finput
+    //legge il file e stampa a mo' di tabella
+    //a sinistra il valore ascii a destra la quantità
+    //i valori letti vengono convertiti in int perchè hanno una formattazione più ordinata
+	for(i=0;i<len_file;i+=0){
+		char buf[len_file];
+        strcpy(buf,"");
+        int contr,len;
+        int j;
+        int tmp;
 
-    while(read(finput, buff, COUNT)>0){
-        printf("%d\n", buff); //Per capire quanto legge, TEMPORANEO
-    }
-
-
-
+        //divide in 8 righe
+        for(j=0;j<8;j++){
+            //legge il primo valore, che è prima dello spazio
+            contr = read_until_char(finput,' ',buf,&len);
+            if(contr<0){
+                //errore nella lettura
+                exit(-1);
+            }
+            i+=len+1;
+            tmp=str_to_int(buf);
+            printf(" |%5d ",tmp);
+            strcpy(buf,"");
+            //legge il secondo valore, che è prima della fine della riga
+            contr = read_until_char(finput,'\n',buf,&len);
+            if(contr<0){
+                //errore nella lettura
+                exit(-1);
+            }
+            i+=len+1;
+            tmp=str_to_int(buf);
+            printf(" %5d| ",tmp);
+            strcpy(buf,"");
+        }
+        printf("\n");
+	}
 
     close(finput);
     return 0;

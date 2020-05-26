@@ -23,26 +23,21 @@ int open_file(char * arg,int *len);
 //ritorna 0 se è un file, 1 se è una directory e -1 se c'è stato qualche errore
 int is_dir(char * arg);
 
-//restituisce la lungheza in byte del file con descrittore
-//non esegue controlli
-//ATTENZIONE: riporta il puntatore ad inizio file
-int file_len(int des);
-
-//restituisce la lunghezza del file con descrittore partendo dalla posizione pos
-//non fa controlli
-//riporta il puntatore a pos
-int file_len2(int des,int pos);
-
-//legge da un file con descrittore fino a che non trova un \n
+//legge da un file con descrittore fino a che non trova una corrispondenza a str
 //il file deve essere aperto prima di richiamare la funzione
 //restituisce -1 se non è stato letto nulla, restituisce 0 se ha avuto successo
-//des indica il descrittore, *buf è dove verrà salvato il contenuto, *len è la quantità di caratteri letti
+//des indica il descrittore, *buf è dove verrà salvato il contenuto, *len è la quantità di caratteri letti, str indica il char a cui fermarsi
+//mettere '\n' in str per leggere tutta una riga
 //è importante passare un buf di grandezza sufficiente a contenere tutto ciò che può essere letto
-int read_until_n(int des,char *buf, int *len);
+int read_until_char(int des,char str,char *buf, int *len);
 
 //esegue il comando in command usando system(), ma salva il risultato nella pipe pip
 //restituisce -1 se c'è stato qualche errore,se no da 0
 int pipe_system_command(int pip[2],char *command);
+
+//conta il numero di file contenuti in una cartella
+//restituisce -1 se ci sono stati errori, se no da il numero di file
+int files_in_dir(char * path);
 
 
 #define ARG_N 0

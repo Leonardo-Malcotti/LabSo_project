@@ -71,7 +71,9 @@ int param_check(char *arg,int arg_type,int arr_check[]){
 
 int str_to_int(char * arg){
     char *err;
+    //tenta di convertirlo in long
     long int tmp = strtol(arg,&err,10);
+    //se err viene inizializzato allora la stringa passata non era interamente di numeri
     if(*err){
         printf("errore nella conversione della stringa\n");
         return -1;
@@ -85,8 +87,10 @@ int str_to_int(char * arg){
 
 
 int open_file(char * arg,int *len){
+    //la struttura stat contiene varie informazioni riguardanti i file
     struct stat buff;
     int tmp = open(arg,O_RDWR);
+    //genera le statistiche del file
     stat(arg,&buff);
     if(tmp < 0){
         //
@@ -95,6 +99,7 @@ int open_file(char * arg,int *len){
         printf("errore nel file passato\n");
         return -1;
     }
+    //legge la lunghezza dello stream dalle statistiche
     *len = (int)buff.st_size;
     return tmp;
 }
@@ -156,13 +161,14 @@ int pipe_system_command(int pip[2],char *command){
 }
 
 
-int read_until_n(int des,char *buf, int *len){
+int read_until_char(int des,char str,char *buf, int *len){
     int rd=0;
     int c=0;
     do{
-        char buf2[1];
+        char buf2[3];
+        strcpy(buf2,"");
         rd=read(des,buf2,1);
-        if(*buf2=='\n'){
+        if(*buf2==str){
             *len=c;
             return 0;
         } else {
@@ -195,7 +201,7 @@ int files_in_dir(char * path){
     close(pip[WRITE_P]);
     char buf[COSTANTE_LIMITE_TEMPORANEA];
     int len_buf;
-    contr = read_until_n(pip[READ_P],buf,&len_buf);
+    contr = read_until_char(pip[READ_P],'\n',buf,&len_buf);
     close(pip[READ_P]);
 /*
     printf("%s\n",buf);
