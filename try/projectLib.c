@@ -177,7 +177,7 @@ int files_in_dir(char * path){
     strcpy(command,"ls ");
     strcat(command,path);
     strcat(command," | wc -l");
-    printf("%s\n",command);
+    //printf("%s\n",command);
 
     fflush(NULL);
     int contr = pipe_system_command(pip,command);
@@ -185,20 +185,21 @@ int files_in_dir(char * path){
     if(contr<0){
         return -1;
     }
-    
+
     close(pip[WRITE_P]);
     char buf[COSTANTE_LIMITE_TEMPORANEA];
     int len_buf;
     contr = read_until_n(pip[READ_P],buf,&len_buf);
     close(pip[READ_P]);
-
+/*
     printf("%s\n",buf);
     printf("%d\n",len_buf);
     printf("%lu\n",strlen(buf));
+    */
     double ret = 0,j=0;
     int i=0;
     for(i=strlen(buf);i>0;i--){
-        printf("%c\n",buf[i]);
+        //printf("%c\n",buf[i]);
         int n=atoi(&buf[i]);
         if(n!=0){
             ret = ret + n*(pow(10,j));

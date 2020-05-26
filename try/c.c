@@ -21,9 +21,9 @@ int main(int argc, char *argv[]) {
     int i;//indice per i for
     int n=0;
     int m=0;
-
+    int ct=0;
     int contr_arg[3] = {0,0,0};
-
+    int pos_files=-1;
     for(i=1;i<argc;i++){
         //viene posto ad 1 se viene letto un parametro corretto
         int controllo = 0;
@@ -56,42 +56,79 @@ int main(int argc, char *argv[]) {
 
             //segnala che è stato letto un parametro valido
             controllo =1;
-
-            int ct = 0;
+            pos_files=i;
             while(i+1 < argc && argv[i+1][0]!='-'){
-                //char tmp[strlen(argv[i+1])];
                 char *tmp_path = argv[i+1];
                 if(is_dir(tmp_path)==1){
-                    int tmp_pipe[2];
-                    char command[strlen(tmp_path)+3];
-                    strcpy(command,"ls ");
-                    strcat(command,tmp_path);
-
-                    pipe_system_command(tmp_pipe,command);
-                    close(tmp_pipe[WRITE_P]);
-
-                    //finchè j è a 0 allora la funzione ha letto qualcosa
-                    //quando sarà -1 allora il file è finito
-                    int j=0;
-                    while(j==0){
-                        int len_str;
-                        char buf[NAME_MAX];
-                        strcpy(buf,"");
-                        j =read_until_n(tmp_pipe[READ_P],buf,&len_str);
-
-                        if(j==0){printf("%s\n",buf);}
-
-                    }
-                    close(tmp_pipe[READ_P]);
+                    int n_file = files_in_dir(tmp_path);
+                    ct+=n_file;
+                } else {
+                    ct++;
                 }
                 i++;
-                ct++;
             }
         }
 
         if(controllo == 0){
             printf("parametri non validi\n");
             exit(-1);
+        }
+
+    }
+
+
+    char *files[ct];
+    if(ct>0){
+        int k=pos_files;
+
+        int p=0;
+        while(k+1 < argc && argv[k+1][0]!='-'){
+            char *tmp_path = argv[k+1];
+
+            if(is_dir(tmp_path)==1){
+                int tmp_pipe[2];
+                char command[strlen(tmp_path)+3];
+                strcpy(command,"ls ");
+                strcat(command,tmp_path);
+
+                pipe_system_command(tmp_pipe,command);
+                close(tmp_pipe[WRITE_P]);
+
+                //finchè j è a 0 allora la funzione ha letto qualcosa
+                //quando sarà -1 allora il file è finito
+                int j=0;
+                while(j==0){
+                    int len_str;
+                    char buf[NAME_MAX];
+                    strcpy(buf,"");
+                    j =read_until_n(tmp_pipe[READ_P],buf,&len_str);
+
+                    if(j==0){
+                        //
+                        //PROBLEMA CON LE STRINGHE
+                        //
+                        strcpy(files[p],"");
+                        strcat(files[p],tmp_path);
+                        printf("%s\n",tmp_path);
+                        strcat(files[p],"/");
+                        strcat(files[p],buf);
+                        printf("%s\n",buf);
+                        p++;
+                    }
+
+                }
+                close(tmp_pipe[READ_P]);
+            } else {
+                files[p]=tmp_path;
+                //strcpy(files[p],tmp_path);
+                p++;
+
+            }
+            k++;
+        }
+
+        for(i=0;i<ct;i++){
+            printf("%s\n",files[i]);
         }
 
     }

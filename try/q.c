@@ -154,6 +154,5 @@ int main(int argc, char *argv[]){
     }
     close(PIPE_CHANNEL);
 
-    //printf("fine %d\n",getpid());
     return 0;
 }
