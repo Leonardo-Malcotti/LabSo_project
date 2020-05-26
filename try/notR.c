@@ -8,7 +8,8 @@
 #define COUNT 1 //Quanti byte leggere ad ogni read
 /*
 prende in input un file .txt e ne stampa a video il report, fornendo statistiche.
-il formato del file di input ï¿½:
+il formato del file di input è:
+
 ascii ricorrenza \n
 
 */
@@ -73,7 +74,7 @@ int main(int argc, char *argv[]) {
     int i;          //iteratore per cicli
     int finput;     //File Descriptor da inizializzare con il file in input
     int len_file;   //Lunghezza del file 'descritto' da finput
-    int *buff;      //Buffer in cui salvo i dati letti
+    char *buff;      //Buffer in cui salvo i dati letti
 
 //Step 1: Gestione dell'argomento in ingresso e creazione del File Descriptor
 
@@ -102,13 +103,15 @@ int main(int argc, char *argv[]) {
     }
 
 //Step 2: lettura da finput
-
-    while(read(finput, buff, COUNT)>0){
-        printf("%d\n", buff); //Per capire quanto legge, TEMPORANEO
-    }
-
-
-
+	//printf("Starting the while cycle to read\n\tfile pointer n. %d\n\tfile length %d\n", finput, len_file);
+    /*while(read(finput, buff, COUNT)>0){
+        printf("%s\n", buff); //Per capire quanto legge, TEMPORANEO
+    }*/
+	//Proviamo con un for che ti devo dire
+	for(i=0;i<len_file;i++){
+		read(finput,buff,COUNT);
+		printf("FOR CYCLE i=%d \t read byte: %s\n",i,buff);
+	}
 
     close(finput);
     return 0;

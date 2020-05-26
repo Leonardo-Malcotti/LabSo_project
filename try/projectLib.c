@@ -18,8 +18,8 @@
 #include <math.h>
 #include "projectLib.h"
 
+//Array universale per i parametri, da accedere utilizzando le costanti ARG_*
 char *arr_param[] = {"-n","-m","-f","-c"};
-
 
 void print_p_help(){
     printf("\n");
@@ -45,12 +45,14 @@ void print_q_help(){
     printf("\n");
 }
 
+
 void print_r_help(){
     printf("\n");
     printf("parametri\n\n");
     printf("-f  indica il percorso del file di input.\n");
     printf("\n");
 }
+
 
 int param_check(char *arg,int arg_type,int arr_check[]){
     if(strcmp(arg,arr_param[arg_type]) == 0){
@@ -97,6 +99,7 @@ int open_file(char * arg,int *len){
     return tmp;
 }
 
+
 int is_dir(char * arg){
     struct stat buff;
     int contr = stat(arg,&buff);
@@ -109,6 +112,7 @@ int is_dir(char * arg){
         return S_ISDIR(buff.st_mode);
     }
 }
+
 
 int pipe_system_command(int pip[2],char *command){
     int contr = 0;
@@ -151,6 +155,7 @@ int pipe_system_command(int pip[2],char *command){
     return 0;
 }
 
+
 int read_until_n(int des,char *buf, int *len){
     int rd=0;
     int c=0;
@@ -167,6 +172,7 @@ int read_until_n(int des,char *buf, int *len){
     }while(rd>0);
     return -1;
 }
+
 
 int files_in_dir(char * path){
     //
