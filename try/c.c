@@ -17,17 +17,28 @@
 #include <limits.h>
 #include "projectLib.h"
 
+/*
+Riceve in come parametri n, m e dei file divisi tra indirizzi diretti e cartelle
+ha il compito di rilevare tutti i file specificati e suddividerli in n gruppi
+creando poi n sottoprocessi p per gestire i file.
+*/
+
 int main(int argc, char *argv[]) {
     int i;//indice per i for
     int n=0;
     int m=0;
+
+    //serve a contare i file specificati
     int ct=0;
+
     int contr_arg[3] = {0,0,0};
+
+    //tiene traccia di dove inizia la lista di file in argv
     int pos_files=-1;
+
     for(i=1;i<argc;i++){
         //viene posto ad 1 se viene letto un parametro corretto
         int controllo = 0;
-
 
         //lettura parametro -n con dovuti controlli
         if(param_check(argv[i],ARG_N,contr_arg) == 0){
@@ -77,14 +88,16 @@ int main(int argc, char *argv[]) {
     }
 
 
-    char *files[ct];
+    //una volta letti i parametri siamo sicuri che siano stati specificati correttamente
+    //e ct contiene il numero di file passati tra cartelle e non
+    //quindi adesso si possono salvare gli indirizzi
+    char files[ct][PATH_MAX];
     if(ct>0){
         int k=pos_files;
 
         int p=0;
         while(k+1 < argc && argv[k+1][0]!='-'){
             char *tmp_path = argv[k+1];
-
             if(is_dir(tmp_path)==1){
                 int tmp_pipe[2];
                 char command[strlen(tmp_path)+3];
@@ -102,25 +115,18 @@ int main(int argc, char *argv[]) {
                     char buf[NAME_MAX];
                     strcpy(buf,"");
                     j =read_until_char(tmp_pipe[READ_P],'\n',buf,&len_str);
-
                     if(j==0){
-                        //
-                        //PROBLEMA CON LE STRINGHE
-                        //
                         strcpy(files[p],"");
                         strcat(files[p],tmp_path);
-                        printf("%s\n",tmp_path);
                         strcat(files[p],"/");
                         strcat(files[p],buf);
-                        printf("%s\n",buf);
                         p++;
                     }
 
                 }
                 close(tmp_pipe[READ_P]);
             } else {
-                files[p]=tmp_path;
-                //strcpy(files[p],tmp_path);
+                strcpy(files[p],tmp_path);
                 p++;
 
             }
