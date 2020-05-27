@@ -7,7 +7,6 @@
 #include <fcntl.h>
 #include <float.h>
 #include <signal.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -165,6 +164,7 @@ int read_until_char(int des,char str,char *buf, int *len){
     int rd=0;
     int c=0;
     do{
+        //buffer di supporto
         char buf2[3];
         strcpy(buf2,"");
         rd=read(des,buf2,1);
@@ -185,37 +185,41 @@ int files_in_dir(char * path){
     //fare controllo sulla dir?
     //
     int pip[2];
+    //creazione del comando per contare il numero di file in una cartella
     char command[strlen(path)+11];//ls path | wc -l
     strcpy(command,"ls ");
     strcat(command,path);
     strcat(command," | wc -l");
-    //printf("%s\n",command);
-
     fflush(NULL);
-    int contr = pipe_system_command(pip,command);
 
+    //avvia il comando facendo in modo che il risultato sia salvato su una pipe
+    int contr = pipe_system_command(pip,command);
     if(contr<0){
         return -1;
     }
-
     close(pip[WRITE_P]);
+
+    //salva in una stringa (buf) il contenuto della prima riga della pipe
     char buf[COSTANTE_LIMITE_TEMPORANEA];
+    strcpy(buf,"");
     int len_buf;
     contr = read_until_char(pip[READ_P],'\n',buf,&len_buf);
     close(pip[READ_P]);
-/*
-    printf("%s\n",buf);
-    printf("%d\n",len_buf);
-    printf("%lu\n",strlen(buf));
-    */
-    double ret = 0,j=0;
+
+    //il problema maggiore di wc è che stampa il risultato con dei tab in testa
+    //quindi una conversione diretta di buf darebbe degli errori, dato che non
+    //è composto solo da char di numeri
+
+    int ret=-1;
     int i=0;
-    for(i=strlen(buf);i>0;i--){
-        //printf("%c\n",buf[i]);
-        int n=atoi(&buf[i]);
-        if(n!=0){
-            ret = ret + n*(pow(10,j));
+
+    //eseguo la conversione spostando l'inizio della stringa di una posizione finchè non ha successo
+    for(i=0;i<len_buf;i++){
+        ret = str_to_int(&buf[i]);
+        if(ret!=-1){
+            i=len_buf;
         }
     }
+
     return (int)ret;
 }
