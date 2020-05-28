@@ -7,7 +7,6 @@
 #include <fcntl.h>
 #include <float.h>
 #include <signal.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -136,7 +135,7 @@ int main(int argc, char *argv[]){
     lseek(finput,((c==0)? 0 : (c-1)*len_parti),SEEK_SET);
 
     rd = read(finput,rff,len_parti);
-
+    //printf("pid: %d -> %s\n\n",getpid(),rff);
     for(i=0;i<rd;i++){
         caratteri[rff[i]]++;
     }
@@ -150,7 +149,9 @@ int main(int argc, char *argv[]){
     for(i=0;i<256;i++){
         char buff[sizeof(caratteri[i])];
         sprintf(buff,"%d",caratteri[i]);
-        write(PIPE_CHANNEL,buff,sizeof(caratteri[i]));
+        //strcat(buff,"\n");
+        write(PIPE_CHANNEL,buff,sizeof(buff));
+        write(PIPE_CHANNEL,"\n",1);
     }
     close(PIPE_CHANNEL);
 

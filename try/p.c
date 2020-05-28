@@ -7,7 +7,6 @@
 #include <fcntl.h>
 #include <float.h>
 #include <signal.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -16,12 +15,6 @@
 #include <sys/ipc.h>
 #include <limits.h>
 #include "projectLib.h"
-/*
-o si trova il modo di rendere -m e -n obbligatori
-o si trova il modo di non dover specificare la lunghezza di paths
-*/
-
-
 
 
 
@@ -101,17 +94,16 @@ int main(int argc, char *argv[]) {
     //fa un fork per ogni file
     int pid= -1;
     int tmp_m=1;
+    //tiene salvata una pipe per ogni sottoprocesso, utilizzando map_pipes per identificarle
     int pipes[(argc-6)*m][2];
     int map_pipes[(argc-6)*m];
+    //conta il numero di pipe presenti
     int c_pipes =0;
 
     for(i=0; i<argc-6 && pid!=0;i++){
         tmp_m=1;
-        //printf("%s\n",paths[i]);
         while(pid!=0 && tmp_m<=m){
-
             pipe(pipes[c_pipes]);
-            //printf("pipe %d creata\n",c_pipes);
             pid = fork();
             if(pid<0){
                 printf("\n%s\n",strerror(errno));
@@ -132,6 +124,7 @@ int main(int argc, char *argv[]) {
         for(i=0; i<c_pipes ;i++){
             close(pipes[i][WRITE_P]);
         }
+        //printf("%d\n",c_pipes);
         for(i=0; i<c_pipes ;i++){
             //printf("ciclo %d",i);
             int ret_pid=wait(NULL);
@@ -147,9 +140,11 @@ int main(int argc, char *argv[]) {
             for(j=0;j<256;j++){
 
             //forse da con
-
+                int ln_lett;
                 char buff[sizeof(int)];
-                read(pipes[k][READ_P],&buff,sizeof(int));
+                strcpy(buff,"");
+                int contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
+                //read(pipes[k][READ_P],&buff,sizeof(int));
                 //printf("%s\n",buff);
                 caratteri[j]+=str_to_int(buff);
             }
@@ -163,9 +158,11 @@ int main(int argc, char *argv[]) {
         sprintf(arg_n,"%d%d",n,i);
         sprintf(arg_m,"%d",m);
         sprintf(arg_c,"%d",tmp_m);
+
         //printf("%s %s %s\n",arg_n,arg_m,arg_c);
         //printf("%s\n",paths[i-1]);
         close(pipes[c_pipes][READ_P]);
+
         dup2(pipes[c_pipes][WRITE_P],PIPE_CHANNEL);
         execlp("./q","q","-f",paths[i-1],"-n",arg_n,"-m",arg_m,"-c",arg_c,NULL);
         //system("echo errore");

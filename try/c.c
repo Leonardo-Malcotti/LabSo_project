@@ -137,6 +137,51 @@ int main(int argc, char *argv[]) {
             printf("%s\n",files[i]);
         }
 
+
+        int pid= -1;
+        //tiene salvata una pipe per ogni sottoprocesso, utilizzando map_pipes per identificarle
+        int pipes[n][2];
+        int map_pipes[n];
+        //conta il numero di pipe presenti
+        int c_pipes=0;
+        //numero di file per ogni gruppo
+        int nf_group=(ct%n!=0)?(ct/n)+1:ct/n;
+
+        //usati per segnare da dove iniziare a leggere da files a dove finire
+        int first_file=0;
+        int last_file=nf_group;
+
+
+
+        for(i=0;i<n && pid!=0;i++){
+            pipe(pipes[c_pipes]);
+            pid=fork();
+            if(pid<0){
+                printf("\n%s\n",strerror(errno));
+                exit(-1);
+            }
+            if(pid!=0){
+                map_pipes[c_pipes]=pid;
+                c_pipes++;
+                first_file=last_file;
+                //c'è da considerare che potrebbe esserci un resto
+                last_file=(last_file+nf_group>ct)?ct : last_file+nf_group;
+            }
+        }
+        if(pid!=0){
+
+        }else{
+            //array che conterrà i file da passare ai sottoprocessi p
+            char argv_f[last_file-first_file][PATH_MAX];
+            int j=0;
+            for(i=first_file;i<last_file;i++){
+                strcpy(argv_f[j],files[i]);
+                j++;
+            }
+
+
+        }
+
     }
 
     return 0;
