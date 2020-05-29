@@ -19,6 +19,7 @@
 #include "projectLib.h"
 
 int main(int argc, char *argv[]) {
+    char caratteri1 [33][3] = {"nul","soh","stx","etx","eot","enq","ack","bel","bs","ht","nl","vt","ff","cr","so","si","dle","dc1","dc2","dc3","dc4","nak","syn","etb","can","em","sub","esc","fs","gs","rs","us","sp"};
     int i;//indice per i for
     int finput,len_file;
 
