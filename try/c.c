@@ -1,0 +1,188 @@
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <ctype.h>
+#include <fcntl.h>
+#include <float.h>
+#include <signal.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/msg.h>
+#include <sys/ipc.h>
+#include <limits.h>
+#include "projectLib.h"
+
+/*
+Riceve in come parametri n, m e dei file divisi tra indirizzi diretti e cartelle
+ha il compito di rilevare tutti i file specificati e suddividerli in n gruppi
+creando poi n sottoprocessi p per gestire i file.
+*/
+
+int main(int argc, char *argv[]) {
+    int i;//indice per i for
+    int n=0;
+    int m=0;
+
+    //serve a contare i file specificati
+    int ct=0;
+
+    int contr_arg[3] = {0,0,0};
+
+    //tiene traccia di dove inizia la lista di file in argv
+    int pos_files=-1;
+
+    for(i=1;i<argc;i++){
+        //viene posto ad 1 se viene letto un parametro corretto
+        int controllo = 0;
+
+        //lettura parametro -n con dovuti controlli
+        if(param_check(argv[i],ARG_N,contr_arg) == 0){
+            //segnala che è stato letto un parametro valido
+            controllo =1;
+            if((n = str_to_int(argv[i+1])) == -1){
+                //stampa errori
+                exit(-1);
+            }
+            i++;
+        }
+
+        //lettura parametro -m con dovuti controlli
+        if(param_check(argv[i],ARG_M,contr_arg) == 0){
+            //segnala che è stato letto un parametro valido
+            controllo =1;
+            if((m = str_to_int(argv[i+1])) == -1){
+                //stampa errori
+                exit(-1);
+            }
+            i++;
+        }
+
+        //legge i valori del parametro -f
+        if(param_check(argv[i],ARG_F,contr_arg) == 0){
+
+            //segnala che è stato letto un parametro valido
+            controllo =1;
+            pos_files=i;
+            while(i+1 < argc && argv[i+1][0]!='-'){
+                char *tmp_path = argv[i+1];
+                if(is_dir(tmp_path)==1){
+                    int n_file = files_in_dir(tmp_path);
+                    ct+=n_file;
+                } else {
+                    ct++;
+                }
+                i++;
+            }
+        }
+
+        if(controllo == 0){
+            printf("parametri non validi\n");
+            exit(-1);
+        }
+
+    }
+
+
+    //una volta letti i parametri siamo sicuri che siano stati specificati correttamente
+    //e ct contiene il numero di file passati tra cartelle e non
+    //quindi adesso si possono salvare gli indirizzi
+    char files[ct][PATH_MAX];
+    if(ct>0){
+        int k=pos_files;
+
+        int p=0;
+        while(k+1 < argc && argv[k+1][0]!='-'){
+            char *tmp_path = argv[k+1];
+            if(is_dir(tmp_path)==1){
+                int tmp_pipe[2];
+                char command[strlen(tmp_path)+3];
+                strcpy(command,"ls ");
+                strcat(command,tmp_path);
+
+                pipe_system_command(tmp_pipe,command);
+                close(tmp_pipe[WRITE_P]);
+
+                //finchè j è a 0 allora la funzione ha letto qualcosa
+                //quando sarà -1 allora il file è finito
+                int j=0;
+                while(j==0){
+                    int len_str;
+                    char buf[NAME_MAX];
+                    strcpy(buf,"");
+                    j =read_until_char(tmp_pipe[READ_P],'\n',buf,&len_str);
+                    if(j==0){
+                        strcpy(files[p],"");
+                        strcat(files[p],tmp_path);
+                        strcat(files[p],"/");
+                        strcat(files[p],buf);
+                        p++;
+                    }
+
+                }
+                close(tmp_pipe[READ_P]);
+            } else {
+                strcpy(files[p],tmp_path);
+                p++;
+
+            }
+            k++;
+        }
+
+        for(i=0;i<ct;i++){
+            printf("%s\n",files[i]);
+        }
+
+
+        int pid= -1;
+        //tiene salvata una pipe per ogni sottoprocesso, utilizzando map_pipes per identificarle
+        int pipes[n][2];
+        int map_pipes[n];
+        //conta il numero di pipe presenti
+        int c_pipes=0;
+        //numero di file per ogni gruppo
+        int nf_group=(ct%n!=0)?(ct/n)+1:ct/n;
+
+        //usati per segnare da dove iniziare a leggere da files a dove finire
+        int first_file=0;
+        int last_file=nf_group;
+
+
+
+        for(i=0;i<n && pid!=0;i++){
+            pipe(pipes[c_pipes]);
+            pid=fork();
+            if(pid<0){
+                printf("\n%s\n",strerror(errno));
+                exit(-1);
+            }
+            if(pid!=0){
+                map_pipes[c_pipes]=pid;
+                c_pipes++;
+                first_file=last_file;
+                //c'è da considerare che potrebbe esserci un resto
+                last_file=(last_file+nf_group>ct)?ct : last_file+nf_group;
+            }
+        }
+        if(pid!=0){
+
+        }else{
+            //array che conterrà i file da passare ai sottoprocessi p
+            char argv_f[last_file-first_file][PATH_MAX];
+            int j=0;
+            for(i=first_file;i<last_file;i++){
+                strcpy(argv_f[j],files[i]);
+                j++;
+            }
+
+
+        }
+
+    }
+
+    return 0;
+}
