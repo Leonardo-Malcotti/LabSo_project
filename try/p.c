@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
         char arg_n[30];
         char arg_m[30];
         char arg_c[30];
-
+        //al parametro n passa il numero del gruppo e il numero di file (n i)
         sprintf(arg_n,"%d%d",n,i);
         sprintf(arg_m,"%d",m);
         sprintf(arg_c,"%d",tmp_m);
@@ -169,8 +169,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-
-
+/*
     int j=0;
     for(j=0;j<256;j++){
         //int g=0;
@@ -180,6 +179,18 @@ int main(int argc, char *argv[]) {
         //}
         //printf("\n");
     }
+*/
+    for(i=0;i<256;i++){
+
+        char buff[sizeof(caratteri[i])];
+        sprintf(buff,"%d",caratteri[i]);
+        //printf("%d\n",caratteri[i]);
+        //strcat(buff,"\n");
+        write(5,buff,sizeof(buff));
+        write(5,"\n",1);
+    }
+    close(PIPE_CHANNEL);
+
 
     return 0;
 }

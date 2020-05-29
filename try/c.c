@@ -93,6 +93,7 @@ int main(int argc, char *argv[]) {
     //quindi adesso si possono salvare gli indirizzi
     char files[ct][PATH_MAX];
     if(ct>0){
+        int caratteri[256]={[0 ... 255]=0};
         int k=pos_files;
 
         int p=0;
@@ -132,12 +133,12 @@ int main(int argc, char *argv[]) {
             }
             k++;
         }
-
+/*
         for(i=0;i<ct;i++){
             printf("%s\n",files[i]);
         }
-
-
+        printf("\n----\n");
+*/
         int pid= -1;
         //tiene salvata una pipe per ogni sottoprocesso, utilizzando map_pipes per identificarle
         int pipes[n][2];
@@ -163,24 +164,99 @@ int main(int argc, char *argv[]) {
             if(pid!=0){
                 map_pipes[c_pipes]=pid;
                 c_pipes++;
+                
                 first_file=last_file;
                 //c'è da considerare che potrebbe esserci un resto
                 last_file=(last_file+nf_group>ct)?ct : last_file+nf_group;
             }
         }
-        if(pid!=0){
 
+printf("%d\n",c_pipes);
+        if(pid!=0){
+            for(i=0; i<c_pipes ;i++){
+                close(pipes[i][WRITE_P]);
+            }
+
+            for(i=0; i<c_pipes ;i++){
+                int ret_pid=wait(NULL);
+                int j=0;
+                int k=-1;
+                for(j=0;j<c_pipes && k==-1;j++){
+                    if(ret_pid==map_pipes[j]){
+                        k=j;
+                    }
+                }
+                for(j=0;j<256;j++){
+                    int ln_lett;
+                    char buff[sizeof(int)];
+                    strcpy(buff,"");
+                    int contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
+                    //printf("%s\n",buff);
+                    caratteri[j]+=str_to_int(buff);
+                }
+                close(pipes[k][READ_P]);
+            }
         }else{
             //array che conterrà i file da passare ai sottoprocessi p
-            char argv_f[last_file-first_file][PATH_MAX];
-            int j=0;
+
+            char arg_n[30];
+            char arg_m[30];
+            //i contiene il numero del gruppo di file a questo punto
+            sprintf(arg_n,"%d",i);
+            sprintf(arg_m,"%d",m);
+
+            //array contenente gli argomenti del sottoprocesso
+            int len_argv = last_file-first_file+7;
+
+            //char argv_p[len_argv][PATH_MAX];
+            char **argv_p = malloc(len_argv * sizeof(argv_p[0]));
+argv_p[0]="p";
+argv_p[1]="-n";
+argv_p[2]=arg_n;
+argv_p[3]="-m";
+argv_p[4]=arg_m;
+argv_p[5]="-f";
+/*
+            strcpy(argv_p[0],"p");
+            strcpy(argv_p[1],"-n");
+            strcpy(argv_p[2],arg_n);
+            strcpy(argv_p[3],"-m");
+            strcpy(argv_p[4],arg_m);
+            strcpy(argv_p[5],"-f");
+*/
+            int j=6;
+            //printf("%d %d\n",first_file,last_file);
             for(i=first_file;i<last_file;i++){
-                strcpy(argv_f[j],files[i]);
+                printf("%s\n",files[i]);
+                //strcpy(argv_p[j],files[i]);
+                argv_p[j]=files[i];
                 j++;
             }
 
+            argv_p[j]=(char *)NULL;
 
+            for(i=0;i<j;i++){
+                //printf("%s ",argv_p[i]);
+            }
+
+            //char *const* arg_ref=(char *const*)argv_p;
+
+            //arg_ref=argv_p;
+
+            close(pipes[c_pipes][READ_P]);
+            dup2(pipes[c_pipes][WRITE_P],5);
+
+            execvp("./p",(char *const*)argv_p);
+
+            printf("%s\n",strerror(errno));
+            return -1;
         }
+        int j=0;
+
+        for(j=0;j<256;j++){
+            printf("%d %d\n",j,caratteri[j]);
+        }
+
 
     }
 
