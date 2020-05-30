@@ -22,19 +22,16 @@ int main(int argc, char *argv[]) {
     int i;//indice per i for
     int n= 0;
     int m= 0;
-
+    int ct = 0;
     //primi controlli sugli argomenti
     //i parametri dovrebbero essere almeno 7:
     //1 per il nome dell'eseguibile
     //4 per n,m e i loro valori
     //1 per -f
     //poi almeno 1 per inizializzare f
-    if(argc < 7){
-        printf("argomento input non trovato\n");
-        return 0;
-    }
 
-    char * paths[argc-6];//numero di files specificati
+    //numero di files specificati
+    char * paths[argc-6];
     int contr_arg[3] = {0,0,0};
 
     //controlli e lettura dei parametri
@@ -76,7 +73,7 @@ int main(int argc, char *argv[]) {
             //
             //magari sarebbe bene da aggiungere qualche controllo sulla correttezza degli stessi
             //
-            int ct = 0;
+
             while(i+1 < argc && argv[i+1][0]!='-'){
                 //char tmp[strlen(argv[i+1])];
                 paths[ct] = argv[i+1];
@@ -91,95 +88,111 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    //fa un fork per ogni file
-    int pid= -1;
-    int tmp_m=1;
-    //tiene salvata una pipe per ogni sottoprocesso, utilizzando map_pipes per identificarle
-    int pipes[(argc-6)*m][2];
-    int map_pipes[(argc-6)*m];
-    //conta il numero di pipe presenti
-    int c_pipes =0;
+    //se non sono stati specificati dei file allora è un processo con un gruppo vuoto
+    //dunque termina direttamente il processo
+    if(ct>0){
+        //fa un fork per ogni file
+        int pid= -1;
+        int tmp_m=1;
+        //tiene salvata una pipe per ogni sottoprocesso, utilizzando map_pipes per identificarle
+        int pipes[(argc-6)*m][2];
+        int map_pipes[(argc-6)*m];
+        //conta il numero di pipe presenti
+        int c_pipes =0;
 
-    for(i=0; i<argc-6 && pid!=0;i++){
-        tmp_m=1;
-        while(pid!=0 && tmp_m<=m){
-            pipe(pipes[c_pipes]);
-            pid = fork();
-            if(pid<0){
-                printf("\n%s\n",strerror(errno));
-                exit(-1);
-            }
-            if(pid!=0){
-                map_pipes[c_pipes]=pid;
-                c_pipes++;
-                tmp_m++;
-            }
-        }
-    }
-    //printf("%d %d %d\n",n,i,tmp_m);
-
-    int caratteri[256]={[0 ... 255]=0};
-    if(pid!=0){
-        //printf("numero pipes %d\n",c_pipes );
-        for(i=0; i<c_pipes ;i++){
-            close(pipes[i][WRITE_P]);
-        }
-        //printf("%d\n",c_pipes);
-        for(i=0; i<c_pipes ;i++){
-            //printf("ciclo %d",i);
-            int ret_pid=wait(NULL);
-            //printf("processo %d ha terminato\n",ret_pid);
-            int j=0;
-            int k=-1;
-            for(j=0;j<c_pipes && k==-1;j++){
-                if(ret_pid==map_pipes[j]){
-                    k=j;
+        for(i=0; i<argc-6 && pid!=0;i++){
+            tmp_m=1;
+            while(pid!=0 && tmp_m<=m){
+                pipe(pipes[c_pipes]);
+                pid = fork();
+                if(pid<0){
+                    printf("\n%s\n",strerror(errno));
+                    exit(-1);
+                }
+                if(pid!=0){
+                    map_pipes[c_pipes]=pid;
+                    c_pipes++;
+                    tmp_m++;
                 }
             }
-            //printf("legge dal canale del figlio %d \n",ret_pid);
-            for(j=0;j<256;j++){
-
-            //forse da con
-                int ln_lett;
-                char buff[sizeof(int)];
-                strcpy(buff,"");
-                int contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
-                //read(pipes[k][READ_P],&buff,sizeof(int));
-                //printf("%s\n",buff);
-                caratteri[j]+=str_to_int(buff);
-            }
-            close(pipes[k][READ_P]);
         }
-    } else{
-        char arg_n[30];
-        char arg_m[30];
-        char arg_c[30];
+        //printf("%d %d %d\n",n,i,tmp_m);
 
-        sprintf(arg_n,"%d%d",n,i);
-        sprintf(arg_m,"%d",m);
-        sprintf(arg_c,"%d",tmp_m);
+        int caratteri[256]={[0 ... 255]=0};
+        if(pid!=0){
+            //printf("numero pipes %d\n",c_pipes );
+            for(i=0; i<c_pipes ;i++){
+                close(pipes[i][WRITE_P]);
+            }
+            //printf("%d\n",c_pipes);
+            for(i=0; i<c_pipes ;i++){
+                //printf("ciclo %d",i);
+                int ret_pid=wait(NULL);
+                //printf("processo %d ha terminato\n",ret_pid);
+                int j=0;
+                int k=-1;
+                for(j=0;j<c_pipes && k==-1;j++){
+                    if(ret_pid==map_pipes[j]){
+                        k=j;
+                    }
+                }
+                //printf("legge dal canale del figlio %d \n",ret_pid);
+                for(j=0;j<256;j++){
 
-        //printf("%s %s %s\n",arg_n,arg_m,arg_c);
-        //printf("%s\n",paths[i-1]);
-        close(pipes[c_pipes][READ_P]);
+                //forse da con
+                    int ln_lett;
+                    char buff[sizeof(int)];
+                    strcpy(buff,"");
+                    int contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
+                    //read(pipes[k][READ_P],&buff,sizeof(int));
+                    //printf("%s\n",buff);
+                    caratteri[j]+=str_to_int(buff);
+                }
+                close(pipes[k][READ_P]);
+            }
+        } else{
+            char arg_n[30];
+            char arg_m[30];
+            char arg_c[30];
+            //al parametro n passa il numero del gruppo e il numero di file (n i)
+            sprintf(arg_n,"%d%d",n,i);
+            sprintf(arg_m,"%d",m);
+            sprintf(arg_c,"%d",tmp_m);
 
-        dup2(pipes[c_pipes][WRITE_P],PIPE_CHANNEL);
-        execlp("./q","q","-f",paths[i-1],"-n",arg_n,"-m",arg_m,"-c",arg_c,NULL);
-        //system("echo errore");
-        return -1;
+            //printf("%s %s %s\n",arg_n,arg_m,arg_c);
+            //printf("%s\n",paths[i-1]);
+            close(pipes[c_pipes][READ_P]);
+
+            dup2(pipes[c_pipes][WRITE_P],PIPE_CHANNEL);
+            execlp("./q","q","-f",paths[i-1],"-n",arg_n,"-m",arg_m,"-c",arg_c,NULL);
+            //system("echo errore");
+            return -1;
+        }
+
+    /*
+        int j=0;
+        for(j=0;j<256;j++){
+            //int g=0;
+            //for(g=0;g<8;g++){
+                printf("%d %d\n",j,caratteri[j]);
+                //j++;
+            //}
+            //printf("\n");
+        }
+    */
+
+    //printf("pid:%d finisce\n",getpid());
+        for(i=0;i<256;i++){
+
+            char buff[sizeof(caratteri[i])];
+            sprintf(buff,"%d",caratteri[i]);
+            //printf("%d\n",caratteri[i]);
+            //strcat(buff,"\n");
+            write(5,buff,sizeof(buff));
+            write(5,"\n",1);
+        }
+        close(PIPE_CHANNEL);
+
     }
-
-
-
-    int j=0;
-    for(j=0;j<256;j++){
-        //int g=0;
-        //for(g=0;g<8;g++){
-            printf("%d %d\n",j,caratteri[j]);
-            //j++;
-        //}
-        //printf("\n");
-    }
-
     return 0;
 }
