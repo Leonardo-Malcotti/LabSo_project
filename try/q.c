@@ -134,6 +134,10 @@ int main(int argc, char *argv[]){
 
     lseek(finput,((c==0)? 0 : (c-1)*len_parti),SEEK_SET);
 
+    if(m==c){
+        len_parti = len_file-(c-1)*len_parti;
+    }
+
     rd = read(finput,rff,len_parti);
     //printf("pid: %d -> %s\n\n",getpid(),rff);
     for(i=0;i<rd;i++){

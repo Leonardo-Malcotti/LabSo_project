@@ -133,20 +133,18 @@ int main(int argc, char *argv[]) {
             }
             k++;
         }
-/*
-        for(i=0;i<ct;i++){
-            printf("%s\n",files[i]);
-        }
-        printf("\n----\n");
-*/
+
         int pid= -1;
+
         //tiene salvata una pipe per ogni sottoprocesso, utilizzando map_pipes per identificarle
         int pipes[n][2];
         int map_pipes[n];
+
         //conta il numero di pipe presenti
         int c_pipes=0;
+
         //numero di file per ogni gruppo
-        int nf_group=(ct%n!=0)?(ct/n)+1:ct/n;
+        int nf_group=(ct%n!=0)? (ct/n)+1 : ct/n;
 
         //usati per segnare da dove iniziare a leggere da files a dove finire
         int first_file=0;
@@ -164,14 +162,15 @@ int main(int argc, char *argv[]) {
             if(pid!=0){
                 map_pipes[c_pipes]=pid;
                 c_pipes++;
-                
+
                 first_file=last_file;
                 //c'è da considerare che potrebbe esserci un resto
                 last_file=(last_file+nf_group>ct)?ct : last_file+nf_group;
             }
         }
 
-printf("%d\n",c_pipes);
+        //il processo padre attende che tutti i figli terminino
+        //e legge i risultati dalle pipe
         if(pid!=0){
             for(i=0; i<c_pipes ;i++){
                 close(pipes[i][WRITE_P]);
@@ -179,6 +178,7 @@ printf("%d\n",c_pipes);
 
             for(i=0; i<c_pipes ;i++){
                 int ret_pid=wait(NULL);
+                //printf("è finito %d\n",ret_pid);
                 int j=0;
                 int k=-1;
                 for(j=0;j<c_pipes && k==-1;j++){
@@ -196,11 +196,13 @@ printf("%d\n",c_pipes);
                 }
                 close(pipes[k][READ_P]);
             }
-        }else{
-            //array che conterrà i file da passare ai sottoprocessi p
+        }
+        //prepara la lista di argomenti e avvia p
+        else{
 
             char arg_n[30];
             char arg_m[30];
+
             //i contiene il numero del gruppo di file a questo punto
             sprintf(arg_n,"%d",i);
             sprintf(arg_m,"%d",m);
@@ -208,27 +210,17 @@ printf("%d\n",c_pipes);
             //array contenente gli argomenti del sottoprocesso
             int len_argv = last_file-first_file+7;
 
-            //char argv_p[len_argv][PATH_MAX];
             char **argv_p = malloc(len_argv * sizeof(argv_p[0]));
-argv_p[0]="p";
-argv_p[1]="-n";
-argv_p[2]=arg_n;
-argv_p[3]="-m";
-argv_p[4]=arg_m;
-argv_p[5]="-f";
-/*
-            strcpy(argv_p[0],"p");
-            strcpy(argv_p[1],"-n");
-            strcpy(argv_p[2],arg_n);
-            strcpy(argv_p[3],"-m");
-            strcpy(argv_p[4],arg_m);
-            strcpy(argv_p[5],"-f");
-*/
+            argv_p[0]="p";
+            argv_p[1]="-n";
+            argv_p[2]=arg_n;
+            argv_p[3]="-m";
+            argv_p[4]=arg_m;
+            argv_p[5]="-f";
+
             int j=6;
-            //printf("%d %d\n",first_file,last_file);
+
             for(i=first_file;i<last_file;i++){
-                printf("%s\n",files[i]);
-                //strcpy(argv_p[j],files[i]);
                 argv_p[j]=files[i];
                 j++;
             }
