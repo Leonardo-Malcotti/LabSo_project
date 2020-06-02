@@ -39,6 +39,8 @@ int pipe_system_command(int pip[2],char *command);
 //restituisce -1 se ci sono stati errori, se no da il numero di file
 int files_in_dir(char * path);
 
+//legge la stringa dallo stdin sostituendo eventuali caporiga con il terminatore di stringa
+char * read_input();
 
 #define ARG_N 0
 #define ARG_M 1
@@ -50,4 +52,5 @@ int files_in_dir(char * path);
 
 #define PIPE_CHANNEL 4
 #define COSTANTE_LIMITE_TEMPORANEA 100
+#define BUFFER_IN_LEN 30
 #endif
