@@ -4,6 +4,7 @@ compile : r.c q.c c.c p.c projectLib.c
 	gcc -std=gnu90 q.c projectLib.c -o q
 	gcc -std=gnu90 p.c projectLib.c -o p
 	gcc -std=gnu90 c.c projectLib.c -o c
+	gcc -std=gnu90 m.c projectLib.c -o m
 
 r : r.c projectLib.c
 	gcc -std=gnu90 r.c projectLib.c -o r
