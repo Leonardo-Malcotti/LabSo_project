@@ -52,6 +52,20 @@ void print_r_help(){
     printf("\n");
 }
 
+void print_m_help(){
+    printf("\n");
+    printf("  comandi:\n");
+    printf("\n  --generali:\n");
+    printf("    h, help, man : stampa questo messaggio d'aiuto.\n");
+    printf("    q, quit, exit : termina l'esecuzione del programma.\n");
+    printf("\n  --parametri di default:\n");
+    printf("    n : modifica il valore di default di n.\n");
+    printf("    m : modifica il valore di default di m.\n");
+    printf("    def, default : visualizza i valori di default attuali di n e m.\n");
+    printf("\n    per modificare n e m è possibile usare la forma contratta\n");
+    printf("    specificando il valore desiderato sulla stessa riga del comando suddiviso da uno spazio\n");
+    printf("\n");
+}
 
 int param_check(char *arg,int arg_type,int arr_check[]){
     if(strcmp(arg,arr_param[arg_type]) == 0){
@@ -222,4 +236,17 @@ int files_in_dir(char * path){
     }
 
     return (int)ret;
+}
+
+
+char * read_input(){
+    char *s=(char *)malloc(BUFFER_IN_LEN*sizeof(char));
+    s = fgets(s,BUFFER_IN_LEN,stdin);
+    int i=0;
+    for(i=0;i<strlen(s);i++){
+        if(s[i]=='\n'|| s[i]==EOF){
+            s[i]='\0';
+        }
+    }
+    return s;
 }
