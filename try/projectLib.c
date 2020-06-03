@@ -20,6 +20,7 @@
 //Array universale per i parametri, da accedere utilizzando le costanti ARG_*
 char *arr_param[] = {"-n","-m","-f","-c"};
 
+
 void print_p_help(){
     printf("\n");
     printf("-f  indica il percorso del file di input.\n");
@@ -52,6 +53,7 @@ void print_r_help(){
     printf("\n");
 }
 
+
 void print_m_help(){
     printf("\n");
     printf("  comandi:\n");
@@ -66,6 +68,7 @@ void print_m_help(){
     printf("    specificando il valore desiderato sulla stessa riga del comando suddiviso da uno spazio\n");
     printf("\n");
 }
+
 
 int param_check(char *arg,int arg_type,int arr_check[]){
     if(strcmp(arg,arr_param[arg_type]) == 0){
@@ -194,7 +197,7 @@ int read_until_char(int des,char str,char *buf, int *len){
 }
 
 
-int files_in_dir(char * path){
+int n_files_in_dir(char * path){
     //
     //fare controllo sulla dir?
     //
@@ -236,6 +239,81 @@ int files_in_dir(char * path){
     }
 
     return (int)ret;
+}
+
+
+int n_files_in_dir_subdir(char * path){
+    int num = n_files_in_dir(path);
+    int tmp = num;
+    int i=0;
+    //matrice che conterrà i percorsi dei file
+    char **tmp_f=(char **)malloc(num*PATH_MAX*sizeof(char));
+    files_in_dir(path,tmp_f);
+
+    //controlla per ogni elemento di tmp_f se è una cartella
+    //se lo è avvia la ricorsione e toglie 1 dal conteggio
+    for(i=0;i<tmp;i++){
+        if(is_dir(tmp_f[i])==1){
+            num--;
+            num+=n_files_in_dir_subdir(tmp_f[i]);
+        }
+    }
+    return num;
+}
+
+
+void files_in_dir(char * path,char ** ret){
+    //fa in modo che venga scritto nella pipe la lista dei file
+    int tmp_pipe[2];
+    char command[strlen(path)+3];
+    strcpy(command,"ls ");
+    strcat(command,path);
+    pipe_system_command(tmp_pipe,command);
+    close(tmp_pipe[WRITE_P]);
+
+    //legge il contenuto della pipe
+    int j=0;
+    int p=0;
+    while(j==0){
+        int len_str;
+        char buf[NAME_MAX];
+        strcpy(buf,"");
+        j =read_until_char(tmp_pipe[READ_P],'\n',buf,&len_str);
+        if(j==0){
+            //stringa di supporto
+            char * str = (char *)malloc(sizeof(path)+sizeof(buf)+1);
+            strcpy(str,"");
+            strcat(str,path);
+            strcat(str,"/");
+            strcat(str,buf);
+            ret[p]=str;
+            p++;
+        }
+    }
+    close(tmp_pipe[READ_P]);
+}
+
+
+void files_in_dir_subdir(char * path, int * p, char **buf){
+    int i=0;
+    //salva temporaneamente il numero di file/cartelle in path
+    int tmp_nf_dir = n_files_in_dir(path);
+
+    //salva temporaneamente il contenuto di path
+    char ** tmp_f_dir = (char **)malloc(tmp_nf_dir*PATH_MAX*sizeof(char));
+    files_in_dir(path,tmp_f_dir);
+
+    //controlla ogni elemento di tmp_f_dir
+    //se è una cartella avvia la ricorsione
+    //se non lo è lo aggiunge a buf e aumenta p
+    for(i=0;i<tmp_nf_dir;i++){
+        if(is_dir(tmp_f_dir[i])==1){
+            files_in_dir_subdir(tmp_f_dir[i],p,buf);
+        } else {
+            buf[*p]=tmp_f_dir[i];
+            (*p)++;
+        }
+    }
 }
 
 

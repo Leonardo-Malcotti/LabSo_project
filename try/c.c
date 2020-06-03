@@ -71,7 +71,8 @@ int main(int argc, char *argv[]) {
             while(i+1 < argc && argv[i+1][0]!='-'){
                 char *tmp_path = argv[i+1];
                 if(is_dir(tmp_path)==1){
-                    int n_file = files_in_dir(tmp_path);
+                    int contr_dir=0;
+                    int n_file = n_files_in_dir_subdir(tmp_path);
                     ct+=n_file;
                 } else {
                     ct++;
@@ -91,7 +92,9 @@ int main(int argc, char *argv[]) {
     //una volta letti i parametri siamo sicuri che siano stati specificati correttamente
     //e ct contiene il numero di file passati tra cartelle e non
     //quindi adesso si possono salvare gli indirizzi
-    char files[ct][PATH_MAX];
+    char **files = (char **)malloc(ct*PATH_MAX*sizeof(char));
+
+    //[ct][PATH_MAX];
     if(ct>0){
         int caratteri[256]={[0 ... 255]=0};
         int k=pos_files;
@@ -100,32 +103,8 @@ int main(int argc, char *argv[]) {
         while(k+1 < argc && argv[k+1][0]!='-'){
             char *tmp_path = argv[k+1];
             if(is_dir(tmp_path)==1){
-                int tmp_pipe[2];
-                char command[strlen(tmp_path)+3];
-                strcpy(command,"ls ");
-                strcat(command,tmp_path);
-
-                pipe_system_command(tmp_pipe,command);
-                close(tmp_pipe[WRITE_P]);
-
-                //finchè j è a 0 allora la funzione ha letto qualcosa
-                //quando sarà -1 allora il file è finito
-                int j=0;
-                while(j==0){
-                    int len_str;
-                    char buf[NAME_MAX];
-                    strcpy(buf,"");
-                    j =read_until_char(tmp_pipe[READ_P],'\n',buf,&len_str);
-                    if(j==0){
-                        strcpy(files[p],"");
-                        strcat(files[p],tmp_path);
-                        strcat(files[p],"/");
-                        strcat(files[p],buf);
-                        p++;
-                    }
-
-                }
-                close(tmp_pipe[READ_P]);
+                //se è una directory allora cerca tutti i file nelle sottodirectory se ci sono
+                files_in_dir_subdir(tmp_path,&p,files);
             } else {
                 strcpy(files[p],tmp_path);
                 p++;

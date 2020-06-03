@@ -5,6 +5,8 @@
 void print_q_help();
 void print_p_help();
 void print_r_help();
+void print_m_help();
+
 //verifica che la stringa passara (arg) corrisponda al parametro specificato (arg_type)(vedere arr_param)
 //controlla che il parametro non venga usato più volte (arr_check)
 //ritorna -1 ad errore, 0 a successo
@@ -35,9 +37,25 @@ int read_until_char(int des,char str,char *buf, int *len);
 //restituisce -1 se c'è stato qualche errore,se no da 0
 int pipe_system_command(int pip[2],char *command);
 
-//conta il numero di file contenuti in una cartella
+//conta il numero di file (o cartelle) contenuti in una cartella
 //restituisce -1 se ci sono stati errori, se no da il numero di file
-int files_in_dir(char * path);
+int n_files_in_dir(char * path);
+
+//conta il numero di file all'interno di una gerarchia di cartelle
+//non conta le cartella
+int n_files_in_dir_subdir(char * path);
+
+//restituisce il contenuto di una cartella
+//ATTENZIONE: ret deve essere dimensionata correttamente, controllando preventivamente
+//il numero di file all'interno della cartella
+void files_in_dir(char * path,char ** ret);
+
+//restituisce il contenuto di tutto l'albero della cartella
+//path è il nome della cartella da cui partire
+//buf è la matrice che deve contenere il risultato, ATTENZIONE:
+//buf deve essere dimensionata per contenere tutti i percorsi
+//p deve essere un int passato per riferimento che indica la posizione in cui iniziare a inserire i percorsi
+void files_in_dir_subdir(char * path, int * p, char **buf);
 
 //legge la stringa dallo stdin sostituendo eventuali caporiga con il terminatore di stringa
 char * read_input();
