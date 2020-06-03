@@ -24,13 +24,17 @@
 typedef struct stat Stat;
 int main(int argn, char *argv[]){
 
-    if(argn != 2){
-        printf("troppi argomenti\n");
-        return 0;
-    }
 
-    int ret=files_in_dir(argv[1]);
+    int ret=n_files_in_dir_subdir(argv[1]);
     printf("%d\n",ret);
+    char **paths=(char **)malloc(ret*NAME_MAX*sizeof(char));
+    int p=0;
+    files_in_dir_subdir(argv[1],&p,paths);
+    printf("%d\n",p);
+    int i=0;
+    for(i=0;i<p;i++){
+        printf("%s\n",paths[i]);
+    }
     //Stat buff;
 /*
     printf("max child %d\n",CHILD_MAX);
