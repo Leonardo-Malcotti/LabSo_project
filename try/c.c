@@ -94,7 +94,6 @@ int main(int argc, char *argv[]) {
     //quindi adesso si possono salvare gli indirizzi
     char **files = (char **)malloc(ct*PATH_MAX*sizeof(char));
 
-    //[ct][PATH_MAX];
     if(ct>0){
         int caratteri[256]={[0 ... 255]=0};
         int k=pos_files;
@@ -113,6 +112,8 @@ int main(int argc, char *argv[]) {
             k++;
         }
 
+
+
         int pid= -1;
 
         //tiene salvata una pipe per ogni sottoprocesso, utilizzando map_pipes per identificarle
@@ -128,7 +129,6 @@ int main(int argc, char *argv[]) {
         //usati per segnare da dove iniziare a leggere da files a dove finire
         int first_file=0;
         int last_file=nf_group;
-
 
 
         for(i=0;i<n && pid!=0;i++){
@@ -157,7 +157,6 @@ int main(int argc, char *argv[]) {
 
             for(i=0; i<c_pipes ;i++){
                 int ret_pid=wait(NULL);
-                //printf("è finito %d\n",ret_pid);
                 int j=0;
                 int k=-1;
                 for(j=0;j<c_pipes && k==-1;j++){
@@ -170,7 +169,7 @@ int main(int argc, char *argv[]) {
                     char buff[sizeof(int)];
                     strcpy(buff,"");
                     int contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
-                    //printf("%s\n",buff);
+
                     caratteri[j]+=str_to_int(buff);
                 }
                 close(pipes[k][READ_P]);
@@ -206,14 +205,6 @@ int main(int argc, char *argv[]) {
 
             argv_p[j]=(char *)NULL;
 
-            for(i=0;i<j;i++){
-                //printf("%s ",argv_p[i]);
-            }
-
-            //char *const* arg_ref=(char *const*)argv_p;
-
-            //arg_ref=argv_p;
-
             close(pipes[c_pipes][READ_P]);
             dup2(pipes[c_pipes][WRITE_P],5);
 
@@ -223,11 +214,19 @@ int main(int argc, char *argv[]) {
             return -1;
         }
         int j=0;
-
+        int ctr = open("report.txt",O_WRONLY|O_CREAT,S_IRWXU);
         for(j=0;j<256;j++){
-            printf("%d %d\n",j,caratteri[j]);
+            char ascii[5];
+            char ricc[10];
+            sprintf(ascii,"%d",j);
+            sprintf(ricc,"%d",caratteri[j]);
+            //printf("%d %d\n",j,caratteri[j]);
+            write(ctr,ascii,sizeof(ascii));
+            write(ctr," ",sizeof(" "));
+            write(ctr,ricc,sizeof(ricc));
+            write(ctr,"\n",sizeof("\n"));
         }
-
+        close(ctr);
 
     }
 
