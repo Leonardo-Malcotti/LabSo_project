@@ -86,45 +86,59 @@ int main(int argc, char *argv[]) {
                 printf("> ");
                 in = read_input();
                 if(strcmp(in,"q")!=0){
-                    write(pip_f[WRITE_P],in,sizeof(in));
-                    write(pip_f[WRITE_P],"\n",1);
-                    cont++;
+                    struct stat buff;
+                    int contr = stat(in,&buff);
+                    if(contr<0){
+                        printf("\n  il file o percorso specificato non esiste o non è accessibile\n\n");
+                    } else {
+                        write(pip_f[WRITE_P],in,sizeof(in));
+                        write(pip_f[WRITE_P],"\n",1);
+                        cont++;
+                    }
                 }
             }
             close(pip_f[WRITE_P]);
 
-            char arg_n[30];
-            char arg_m[30];
+            if(cont!=0){
 
-            //i contiene il numero del gruppo di file a questo punto
-            sprintf(arg_n,"%d",def_n);
-            sprintf(arg_m,"%d",def_m);
+                char arg_n[30];
+                char arg_m[30];
 
-            char ** argv_c = malloc((cont+7)*sizeof(argv_c[0]));
-            argv_c[0]="c";
-            argv_c[1]="-n";
-            argv_c[2]=arg_n;
-            argv_c[3]="-m";
-            argv_c[4]=arg_m;
-            argv_c[5]="-f";
+                //i contiene il numero del gruppo di file a questo punto
+                sprintf(arg_n,"%d",def_n);
+                sprintf(arg_m,"%d",def_m);
 
-            for(i=6;i<cont+7;i++){
-                int len=0;
-                char * str_tmp = (char *)malloc(PATH_MAX*sizeof(char));
-                int contr = read_until_char(pip_f[READ_P],'\n',str_tmp,&len);
-                argv_c[i]=str_tmp;
-            }
-            argv_c[cont+6]=(char *)NULL;
-            int id = fork();
+                char ** argv_c = malloc((cont+7)*sizeof(argv_c[0]));
+                argv_c[0]="c";
+                argv_c[1]="-n";
+                argv_c[2]=arg_n;
+                argv_c[3]="-m";
+                argv_c[4]=arg_m;
+                argv_c[5]="-f";
 
-            if(id==0){
+                for(i=6;i<cont+7;i++){
+                    int len=0;
+                    char * str_tmp = (char *)malloc(PATH_MAX*sizeof(char));
+                    int contr = read_until_char(pip_f[READ_P],'\n',str_tmp,&len);
 
-                execvp("./c",(char *const*)argv_c);
-                return -1;
+                    argv_c[i]=str_tmp;
+                }
+                close(pip_f[READ_P]);
+                argv_c[cont+6]=(char *)NULL;
+                int id = fork();
+
+                if(id==0){
+                    execvp("./c",(char *const*)argv_c);
+                    return -1;
+                } else {
+                    printf("\n  avvio del conteggio\n\n");
+                }
             } else {
-                printf("\n  avvio del conteggio\n\n");
-                cmd_valido=1;
+                close(pip_f[READ_P]);
+                printf("\n  non sono stati specificati file o directory valide\n");
+                printf("  processo annullato\n\n");
             }
+            cmd_valido=1;
         }
 
         //comandi contratti per la modifica di n o m

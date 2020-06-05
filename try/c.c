@@ -27,7 +27,6 @@ int main(int argc, char *argv[]) {
     int i;//indice per i for
     int n=0;
     int m=0;
-
     //serve a contare i file specificati
     int ct=0;
 
@@ -70,7 +69,12 @@ int main(int argc, char *argv[]) {
             pos_files=i;
             while(i+1 < argc && argv[i+1][0]!='-'){
                 char *tmp_path = argv[i+1];
-                if(is_dir(tmp_path)==1){
+                int contr = is_dir(tmp_path);
+                if(contr<0){
+                    printf("\nerrore: %s non esiste o non è accessibile\n\n",tmp_path);
+                    exit(-1);
+                }
+                if(contr==1){
                     int contr_dir=0;
                     int n_file = n_files_in_dir_subdir(tmp_path);
                     ct+=n_file;
@@ -105,9 +109,8 @@ int main(int argc, char *argv[]) {
                 //se è una directory allora cerca tutti i file nelle sottodirectory se ci sono
                 files_in_dir_subdir(tmp_path,&p,files);
             } else {
-                strcpy(files[p],tmp_path);
+                files[p]=tmp_path;
                 p++;
-
             }
             k++;
         }
