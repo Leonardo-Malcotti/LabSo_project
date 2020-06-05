@@ -70,5 +70,5 @@ char * read_input();
 
 #define PIPE_CHANNEL 4
 #define COSTANTE_LIMITE_TEMPORANEA 100
-#define BUFFER_IN_LEN 30
+#define BUFFER_IN_LEN 256
 #endif

@@ -73,6 +73,74 @@ int main(int argc, char *argv[]) {
             cmd_valido=1;
         }
 
+        //comando verboso per l'avvio di c
+        if(strcmp(s,"c")==0){
+            int pip_f[2];
+            int cont=0;
+            pipe(pip_f);
+            printf("\n  elencare i file da analizzare\n");
+            printf("  digitare q per terminare\n\n");
+            char *in=(char*)malloc(PATH_MAX*sizeof(char));
+            strcpy(in,"not q");
+            while(strcmp(in,"q")!=0){
+                printf("> ");
+                in = read_input();
+                if(strcmp(in,"q")!=0){
+                    struct stat buff;
+                    int contr = stat(in,&buff);
+                    if(contr<0){
+                        printf("\n  il file o percorso specificato non esiste o non è accessibile\n\n");
+                    } else {
+                        write(pip_f[WRITE_P],in,sizeof(in));
+                        write(pip_f[WRITE_P],"\n",1);
+                        cont++;
+                    }
+                }
+            }
+            close(pip_f[WRITE_P]);
+
+            if(cont!=0){
+
+                char arg_n[30];
+                char arg_m[30];
+
+                //i contiene il numero del gruppo di file a questo punto
+                sprintf(arg_n,"%d",def_n);
+                sprintf(arg_m,"%d",def_m);
+
+                char ** argv_c = malloc((cont+7)*sizeof(argv_c[0]));
+                argv_c[0]="c";
+                argv_c[1]="-n";
+                argv_c[2]=arg_n;
+                argv_c[3]="-m";
+                argv_c[4]=arg_m;
+                argv_c[5]="-f";
+
+                for(i=6;i<cont+7;i++){
+                    int len=0;
+                    char * str_tmp = (char *)malloc(PATH_MAX*sizeof(char));
+                    int contr = read_until_char(pip_f[READ_P],'\n',str_tmp,&len);
+
+                    argv_c[i]=str_tmp;
+                }
+                close(pip_f[READ_P]);
+                argv_c[cont+6]=(char *)NULL;
+                int id = fork();
+
+                if(id==0){
+                    execvp("./c",(char *const*)argv_c);
+                    return -1;
+                } else {
+                    printf("\n  avvio del conteggio\n\n");
+                }
+            } else {
+                close(pip_f[READ_P]);
+                printf("\n  non sono stati specificati file o directory valide\n");
+                printf("  processo annullato\n\n");
+            }
+            cmd_valido=1;
+        }
+
         //comandi contratti per la modifica di n o m
         if(strlen(s)>=3 && cmd_valido==0){
             if(s[0]=='n' && s[1]==' '){

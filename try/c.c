@@ -27,7 +27,6 @@ int main(int argc, char *argv[]) {
     int i;//indice per i for
     int n=0;
     int m=0;
-
     //serve a contare i file specificati
     int ct=0;
 
@@ -70,7 +69,12 @@ int main(int argc, char *argv[]) {
             pos_files=i;
             while(i+1 < argc && argv[i+1][0]!='-'){
                 char *tmp_path = argv[i+1];
-                if(is_dir(tmp_path)==1){
+                int contr = is_dir(tmp_path);
+                if(contr<0){
+                    printf("\nerrore: %s non esiste o non è accessibile\n\n",tmp_path);
+                    exit(-1);
+                }
+                if(contr==1){
                     int contr_dir=0;
                     int n_file = n_files_in_dir_subdir(tmp_path);
                     ct+=n_file;
@@ -94,7 +98,6 @@ int main(int argc, char *argv[]) {
     //quindi adesso si possono salvare gli indirizzi
     char **files = (char **)malloc(ct*PATH_MAX*sizeof(char));
 
-    //[ct][PATH_MAX];
     if(ct>0){
         int caratteri[256]={[0 ... 255]=0};
         int k=pos_files;
@@ -106,12 +109,13 @@ int main(int argc, char *argv[]) {
                 //se è una directory allora cerca tutti i file nelle sottodirectory se ci sono
                 files_in_dir_subdir(tmp_path,&p,files);
             } else {
-                strcpy(files[p],tmp_path);
+                files[p]=tmp_path;
                 p++;
-
             }
             k++;
         }
+
+
 
         int pid= -1;
 
@@ -128,7 +132,6 @@ int main(int argc, char *argv[]) {
         //usati per segnare da dove iniziare a leggere da files a dove finire
         int first_file=0;
         int last_file=nf_group;
-
 
 
         for(i=0;i<n && pid!=0;i++){
@@ -157,7 +160,6 @@ int main(int argc, char *argv[]) {
 
             for(i=0; i<c_pipes ;i++){
                 int ret_pid=wait(NULL);
-                //printf("è finito %d\n",ret_pid);
                 int j=0;
                 int k=-1;
                 for(j=0;j<c_pipes && k==-1;j++){
@@ -170,7 +172,7 @@ int main(int argc, char *argv[]) {
                     char buff[sizeof(int)];
                     strcpy(buff,"");
                     int contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
-                    //printf("%s\n",buff);
+
                     caratteri[j]+=str_to_int(buff);
                 }
                 close(pipes[k][READ_P]);
@@ -206,14 +208,6 @@ int main(int argc, char *argv[]) {
 
             argv_p[j]=(char *)NULL;
 
-            for(i=0;i<j;i++){
-                //printf("%s ",argv_p[i]);
-            }
-
-            //char *const* arg_ref=(char *const*)argv_p;
-
-            //arg_ref=argv_p;
-
             close(pipes[c_pipes][READ_P]);
             dup2(pipes[c_pipes][WRITE_P],5);
 
@@ -223,11 +217,19 @@ int main(int argc, char *argv[]) {
             return -1;
         }
         int j=0;
-
+        int ctr = open("report.txt",O_WRONLY|O_CREAT,S_IRWXU);
         for(j=0;j<256;j++){
-            printf("%d %d\n",j,caratteri[j]);
+            char ascii[5];
+            char ricc[10];
+            sprintf(ascii,"%d",j);
+            sprintf(ricc,"%d",caratteri[j]);
+            //printf("%d %d\n",j,caratteri[j]);
+            write(ctr,ascii,sizeof(ascii));
+            write(ctr," ",sizeof(" "));
+            write(ctr,ricc,sizeof(ricc));
+            write(ctr,"\n",sizeof("\n"));
         }
-
+        close(ctr);
 
     }
 

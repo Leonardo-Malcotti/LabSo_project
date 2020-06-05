@@ -149,6 +149,7 @@ int pipe_system_command(int pip[2],char *command){
         //
         //errori
         //
+        printf("errore dup\n");
         return std;
     }
     contr=dup2(pip[WRITE_P],STDOUT_FILENO);
