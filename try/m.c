@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
             pipe(pip_f);
             printf("\n  elencare i file da analizzare\n");
             printf("  digitare q per terminare\n\n");
-            char *in=(char*)malloc(PATH_MAX*sizeof(char));
+            char *in=(char*)calloc(PATH_MAX,sizeof(char));
             strcpy(in,"not q");
             while(strcmp(in,"q")!=0){
                 printf("> ");
@@ -91,24 +91,26 @@ int main(int argc, char *argv[]) {
                     if(contr<0){
                         printf("\n  il file o percorso specificato non esiste o non è accessibile\n\n");
                     } else {
-                        write(pip_f[WRITE_P],in,sizeof(in));
+                        write(pip_f[WRITE_P],in,strlen(in));
+                        //printf("%s\n",in );
                         write(pip_f[WRITE_P],"\n",1);
                         cont++;
                     }
                 }
             }
+            free(in);
             close(pip_f[WRITE_P]);
 
             if(cont!=0){
 
-                char arg_n[30];
-                char arg_m[30];
+                char arg_n[int_len(def_n)];
+                char arg_m[int_len(def_m)];
 
                 //i contiene il numero del gruppo di file a questo punto
                 sprintf(arg_n,"%d",def_n);
                 sprintf(arg_m,"%d",def_m);
 
-                char ** argv_c = malloc((cont+7)*sizeof(argv_c[0]));
+                char ** argv_c =(char **)calloc((cont+7),sizeof(char)*PATH_MAX);
                 argv_c[0]="c";
                 argv_c[1]="-n";
                 argv_c[2]=arg_n;
@@ -118,10 +120,14 @@ int main(int argc, char *argv[]) {
 
                 for(i=6;i<cont+7;i++){
                     int len=0;
-                    char * str_tmp = (char *)malloc(PATH_MAX*sizeof(char));
+                    char * str_tmp = (char *)calloc(PATH_MAX,sizeof(char));
                     int contr = read_until_char(pip_f[READ_P],'\n',str_tmp,&len);
+                    if(contr>=0){
 
-                    argv_c[i]=str_tmp;
+                        argv_c[i]=strdup(str_tmp);
+
+                    }
+                    free(str_tmp);
                 }
                 close(pip_f[READ_P]);
                 argv_c[cont+6]=(char *)NULL;

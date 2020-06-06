@@ -93,8 +93,7 @@ int str_to_int(char * arg){
     if(*err){
         printf("errore nella conversione della stringa\n");
         return -1;
-    }
-    if(tmp<0){
+    }else if(tmp<0){
         printf("numero risultante negativo\n");
         return -1;
     }
@@ -125,6 +124,7 @@ int is_dir(char * arg){
     struct stat buff;
     int contr = stat(arg,&buff);
     if(contr<0){
+        printf("stat: %s\n",strerror(errno));
         //
         //controlli
         //
@@ -139,6 +139,7 @@ int pipe_system_command(int pip[2],char *command){
     int contr = 0;
     contr=pipe(pip);
     if(contr<0){
+        printf("pipe: %s\n",strerror(errno));
         //
         //errori
         //
@@ -146,14 +147,15 @@ int pipe_system_command(int pip[2],char *command){
     }
     int std = dup(STDOUT_FILENO);
     if(std<0){
+        printf("dup: %s\n",strerror(errno));
         //
         //errori
         //
-        printf("errore dup\n");
         return std;
     }
     contr=dup2(pip[WRITE_P],STDOUT_FILENO);
     if(contr<0){
+        printf("dup2: %s\n",strerror(errno));
         //
         //errori
         //
@@ -161,6 +163,7 @@ int pipe_system_command(int pip[2],char *command){
     }
     contr=system(command);
     if(contr<0){
+        printf("system: %s\n",strerror(errno));
         //
         //errori
         //
@@ -169,6 +172,7 @@ int pipe_system_command(int pip[2],char *command){
     fflush(NULL);
     contr=dup2(std,STDOUT_FILENO);
     if(contr<0){
+        printf("dup2 2 : %s\n",strerror(errno));
         //
         //errori
         //
@@ -194,6 +198,7 @@ int read_until_char(int des,char str,char *buf, int *len){
             c++;
         }
     }while(rd>0);
+
     return -1;
 }
 
@@ -328,4 +333,13 @@ char * read_input(){
         }
     }
     return s;
+}
+
+int int_len(int arg){
+    double tmp = arg;
+    int ret=0;
+    while(tmp>0){
+        tmp=tmp/10;
+    }
+    return ret;
 }

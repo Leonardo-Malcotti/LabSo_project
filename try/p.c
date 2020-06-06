@@ -126,17 +126,25 @@ int main(int argc, char *argv[]) {
 
                 for(j=0;j<256;j++){
                     int ln_lett;
-                    char buff[sizeof(int)];
+                    char buff[100];
                     strcpy(buff,"");
                     int contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
-                    caratteri[j]+=str_to_int(buff);
+                    if(contr>=0){
+                        int cc=str_to_int(buff);
+                        if(cc<0){
+                            printf("dioc\n");
+                        }else{
+                            caratteri[j]+=cc;
+                        }
+
+                    }
                 }
                 close(pipes[k][READ_P]);
             }
         } else{
-            char arg_n[30];
-            char arg_m[30];
-            char arg_c[30];
+            char arg_n[int_len(n)+int_len(i)];
+            char arg_m[int_len(m)];
+            char arg_c[int_len(tmp_m)];
             //al parametro n passa il numero del gruppo e il numero di file (n i)
             sprintf(arg_n,"%d%d",n,i);
             sprintf(arg_m,"%d",m);
@@ -150,11 +158,11 @@ int main(int argc, char *argv[]) {
         }
 
         for(i=0;i<256;i++){
-
-            char buff[sizeof(caratteri[i])];
+            char *buff=(char *)calloc(int_len(caratteri[i]),sizeof(char));
             sprintf(buff,"%d",caratteri[i]);
-            write(5,buff,sizeof(buff));
+            write(5,buff,strlen(buff));
             write(5,"\n",1);
+            free(buff);
         }
         close(PIPE_CHANNEL);
 

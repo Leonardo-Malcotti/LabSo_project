@@ -69,6 +69,7 @@ int main(int argc, char *argv[]){
             controllo = 1;
             if((finput = open_file(argv[i+1],&len_file)) == -1){
                 //stampa errori
+                printf("q: file non aperto\n");
                 exit(-1);
             }
         }
@@ -124,7 +125,6 @@ int main(int argc, char *argv[]){
     int caratteri[256]={[0 ... 255]=0};
 
     char *rff = (char *)calloc(len_file,sizeof(char));
-
     int rd=0;
 
     int len_parti = (c==0)? len_file : len_file/m;
@@ -138,24 +138,43 @@ int main(int argc, char *argv[]){
     }
 
     rd = read(finput,rff,len_parti);
+    /*
+    if(rd<0){
+        printf("read q: %s\n",strerror(errno));
+    }
+    else if(rd==0){
+        printf("letto nulla\n");
+    }
+    else {
+        printf("leggo %d\n",rd);
+    }
+    */
     //printf("pid: %d -> %s\n\n",getpid(),rff);
     for(i=0;i<rd;i++){
         caratteri[rff[i]]++;
     }
-
+/*
+    for(i=0;i<256;i++){
+        printf("%d\n",caratteri[i]);
+    }
+    */
+    free(rff);
     close(finput);
 
     //
     //scrittura del risultato sul canale d'uscita
     //
-
+//if(rd>0){
     for(i=0;i<256;i++){
-        char buff[sizeof(caratteri[i])];
+        char buff[100];
+        strcpy(buff,"");
         sprintf(buff,"%d",caratteri[i]);
         //strcat(buff,"\n");
-        write(PIPE_CHANNEL,buff,sizeof(buff));
+        write(PIPE_CHANNEL,buff,strlen(buff));
         write(PIPE_CHANNEL,"\n",1);
+        //free(buff);
     }
+//}
     close(PIPE_CHANNEL);
 
     return 0;
