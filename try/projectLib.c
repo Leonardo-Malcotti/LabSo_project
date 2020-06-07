@@ -66,6 +66,8 @@ void print_m_help(){
     printf("    def, default : visualizza i valori di default attuali di n e m.\n");
     printf("\n    per modificare n e m è possibile usare la forma contratta\n");
     printf("    specificando il valore desiderato sulla stessa riga del comando suddiviso da uno spazio\n");
+    printf("\n  --conteggio:\n");
+    printf("    c : avvia il conteggio con i parametri di default\n");
     printf("\n");
 }
 
