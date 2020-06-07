@@ -18,7 +18,7 @@
 #include <math.h>
 #include "projectLib.h"
 
-int char_type(char c);
+int char_type(char *c);
 
 int main(int argc, char *argv[]) {
     char caratteri1 [33][3] = {"nul","soh","stx","etx","eot","enq","ack","bel","bs","ht","nl","vt","ff","cr","so","si","dle","dc1","dc2","dc3","dc4","nak","syn","etb","can","em","sub","esc","fs","gs","rs","us","sp"};
@@ -85,14 +85,13 @@ int main(int argc, char *argv[]) {
 	        }
 	        printf("\n");
 	}
-	//USANDO LE STREAM DOVREBBE ESSERE SEMPLICE, CON I FILE DESCRIPTOR È UNA BESTEMMIA INUTILE
 	printf("\nNumeri trovati:\t%d\nCaratteri minuscoli:\t%d\nCaratteri maiuscoli:\t%d\nPunteggiatura 'semplice':\t%d\nPunteggiatura 'complessa':\t%d\nAltro:\t%d\n",c_nums,c_lowl,c_uppl,c_spun,c_cpun,c_oths);
     close(finput);
     return 0;
 }
 
 
-int char_type(char c){
+int char_type(char *c){
 /*Simple function to detect what type of char is the one passed.
 * returns:
 *	- 0 : number
@@ -102,16 +101,16 @@ int char_type(char c){
 *	- 4 : complex punctuation (brackets, braces, parentheses, dash, @, and many others)
 *	- 5 : others
 */
+	int x = atoi(c);
 	int ret = 5;
-	int x = c;
-	if(x>47 && x<58)  { ret = 0; }else
-	if(x>96 && x<123) { ret = 1; }else
-	if(x>64 && x<91)  { ret = 2; }else
-	if(x>31 && x<127) {
+	if(x>47 && x<58)  { ret = 0; }else //numeri
+	if(x>96 && x<123) { ret = 1; }else //lettere minuscole
+	if(x>64 && x<91)  { ret = 2; }else //lettere maiuscole
+	if(x>31 && x<127) {		   //punteggiatura:
 		if(x==33 || x==34 || x==39 || x==44 || x==46 || x==58 || x==59 || x==63){
-			ret = 3;
+			ret = 3;	   //	semplice
 		}else{
-			ret = 4;
+			ret = 4;	   //	complessa
 		}
 	}
 	return ret;
