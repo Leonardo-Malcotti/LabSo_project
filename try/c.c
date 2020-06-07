@@ -93,12 +93,13 @@ int main(int argc, char *argv[]) {
     }
 
 
-    //una volta letti i parametri siamo sicuri che siano stati specificati correttamente
-    //e ct contiene il numero di file passati tra cartelle e non
-    //quindi adesso si possono salvare gli indirizzi
-    char **files = (char **)malloc(ct*PATH_MAX*sizeof(char));
+
 
     if(ct>0){
+        //una volta letti i parametri siamo sicuri che siano stati specificati correttamente
+        //e ct contiene il numero di file passati tra cartelle e non
+        //quindi adesso si possono salvare gli indirizzi
+        char **files = (char **)malloc(ct*PATH_MAX*sizeof(char));
         int caratteri[256]={[0 ... 255]=0};
         int k=pos_files;
 
@@ -169,7 +170,7 @@ int main(int argc, char *argv[]) {
                 }
                 for(j=0;j<256;j++){
                     int ln_lett;
-                    char buff[sizeof(int)];
+                    char buff[COSTANTE_LIMITE_TEMPORANEA];
                     strcpy(buff,"");
                     int contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
 
@@ -181,8 +182,8 @@ int main(int argc, char *argv[]) {
         //prepara la lista di argomenti e avvia p
         else{
 
-            char arg_n[30];
-            char arg_m[30];
+            char arg_n[int_len(n)];
+            char arg_m[int_len(m)];
 
             //i contiene il numero del gruppo di file a questo punto
             sprintf(arg_n,"%d",i);
@@ -219,17 +220,24 @@ int main(int argc, char *argv[]) {
         int j=0;
         int ctr = open("report.txt",O_WRONLY|O_CREAT,S_IRWXU);
         for(j=0;j<256;j++){
-            char ascii[5];
-            char ricc[10];
+            //char ascii[5];
+            char *ascii=(char*)calloc(int_len(j),sizeof(char));
+            //strcpy(ascii,"");
+            //char ricc[10];
+            char *ricc=(char*)calloc(int_len(caratteri[j]),sizeof(char));
+            //strcpy(ricc,"");
             sprintf(ascii,"%d",j);
             sprintf(ricc,"%d",caratteri[j]);
             //printf("%d %d\n",j,caratteri[j]);
-            write(ctr,ascii,sizeof(ascii));
-            write(ctr," ",sizeof(" "));
-            write(ctr,ricc,sizeof(ricc));
-            write(ctr,"\n",sizeof("\n"));
+            write(ctr,ascii,strlen(ascii));
+            write(ctr," ",strlen(" "));
+            write(ctr,ricc,strlen(ricc));
+            write(ctr,"\n",strlen("\n"));
+            free(ascii);
+            free(ricc);
         }
         close(ctr);
+        free(files);
 
     }
 

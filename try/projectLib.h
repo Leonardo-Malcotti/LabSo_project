@@ -60,6 +60,10 @@ void files_in_dir_subdir(char * path, int * p, char **buf);
 //legge la stringa dallo stdin sostituendo eventuali caporiga con il terminatore di stringa
 char * read_input();
 
+//funzione di comode per sapere quante cifre ha un numero intero positivo
+int int_len(int arg);
+
+
 #define ARG_N 0
 #define ARG_M 1
 #define ARG_F 2
