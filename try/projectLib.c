@@ -93,10 +93,10 @@ int str_to_int(char * arg){
     long int tmp = strtol(arg,&err,10);
     //se err viene inizializzato allora la stringa passata non era interamente di numeri
     if(*err){
-        printf("errore nella conversione della stringa\n");
+        //printf("errore nella conversione della stringa\n");
         return -1;
     }else if(tmp<0){
-        printf("numero risultante negativo\n");
+        //printf("numero risultante negativo\n");
         return -1;
     }
     return (int)tmp;

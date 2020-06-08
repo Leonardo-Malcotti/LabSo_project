@@ -79,6 +79,7 @@ int main(int argc, char *argv[]){
             controllo = 1;
             if((n = str_to_int(argv[i+1])) == -1){
                 //stampa errori
+                printf("q: errore nel parametro n\n");
                 exit(-1);
             }
         }
@@ -88,6 +89,7 @@ int main(int argc, char *argv[]){
             controllo = 1;
             if((m = str_to_int(argv[i+1])) == -1){
                 //stampa errori
+                printf("q: errore nel parametro m\n");
                 exit(-1);
             }
 
@@ -102,6 +104,7 @@ int main(int argc, char *argv[]){
             controllo = 1;
             if((c=str_to_int(argv[i+1])) == -1){
                 //stampa errori
+                printf("q: errore nel parametro c\n");
                 exit(-1);
             }
 
@@ -121,7 +124,7 @@ int main(int argc, char *argv[]){
     //Analisi del file
     //
 
-    //inorridisco ma intanto ok
+    
     int caratteri[N_CARATTERI]={[0 ... N_CARATTERI-1]=0};
 
     char *rff = (char *)calloc(len_file,sizeof(char));
@@ -150,8 +153,12 @@ int main(int argc, char *argv[]){
     //scrittura del risultato sul canale d'uscita
     //
 
+    char buff[100];
+    strcpy(buff,"");
+    sprintf(buff,"%d\n",n);
+    write(PIPE_CHANNEL,buff,strlen(buff));
     for(i=0;i<N_CARATTERI;i++){
-        char buff[100];
+        //char buff[100];
         strcpy(buff,"");
         sprintf(buff,"%d\n",caratteri[i]);
         //strcat(buff,"\n");

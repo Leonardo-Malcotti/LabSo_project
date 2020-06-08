@@ -24,7 +24,7 @@ creando poi n sottoprocessi p per gestire i file.
 */
 
 int main(int argc, char *argv[]) {
-    int i;//indice per i for
+    int i,j;//indice per i for
     int n=0;
     int m=0;
     //serve a contare i file specificati
@@ -45,6 +45,7 @@ int main(int argc, char *argv[]) {
             controllo =1;
             if((n = str_to_int(argv[i+1])) == -1){
                 //stampa errori
+                printf("c: errore nel parametro n\n");
                 exit(-1);
             }
             i++;
@@ -56,6 +57,7 @@ int main(int argc, char *argv[]) {
             controllo =1;
             if((m = str_to_int(argv[i+1])) == -1){
                 //stampa errori
+                printf("c: errore nel parametro m\n");
                 exit(-1);
             }
             i++;
@@ -100,6 +102,14 @@ int main(int argc, char *argv[]) {
         //e ct contiene il numero di file passati tra cartelle e non
         //quindi adesso si possono salvare gli indirizzi
         char **files = (char **)malloc(ct*PATH_MAX*sizeof(char));
+        int val_per_file[ct][N_CARATTERI];
+        for(i=0;i<ct;i++){
+            for(j=0;j<N_CARATTERI;j++){
+                val_per_file[i][j]=0;
+            }
+        }
+
+
         int caratteri[N_CARATTERI]={[0 ... N_CARATTERI-1]=0};
         int k=pos_files;
 
@@ -115,7 +125,6 @@ int main(int argc, char *argv[]) {
             }
             k++;
         }
-
 
 
         int pid= -1;
@@ -161,29 +170,63 @@ int main(int argc, char *argv[]) {
 
             for(i=0; i<c_pipes ;i++){
                 int ret_pid=wait(NULL);
-                int j=0;
                 int k=-1;
                 for(j=0;j<c_pipes && k==-1;j++){
                     if(ret_pid==map_pipes[j]){
                         k=j;
                     }
                 }
-                for(j=0;j<N_CARATTERI;j++){
-                    int ln_lett;
-                    char buff[COSTANTE_LIMITE_TEMPORANEA];
-                    strcpy(buff,"");
-                    int contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
+                int contr=0;
+                int ln_lett;
+                char buff[PATH_MAX];
 
-                    caratteri[j]+=str_to_int(buff);
+                for(j=0;j<N_CARATTERI;j++){
+                    strcpy(buff,"");
+                    contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
+                    int cc = str_to_int(buff);
+                    if(cc<0){
+                        printf("c: errore nella conversione di un valore letto da pipe\n");
+                    } else {
+                        caratteri[j]+=cc;
+                    }
                 }
+                //legge il resto della pipe per i dati dei singoli file
+                while(contr!=-1){
+                    strcpy(buff,"");
+                    contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
+                    if(contr!=-1){
+                        int id_file=-1;
+                        for(j=0;j<ct && id_file==-1;j++){
+                            if(strcmp(buff,files[j])==0){
+                                id_file=j;
+                            }
+                        }
+
+                        if(id_file!=-1){
+                            for(j=0;j<N_CARATTERI;j++){
+                                strcpy(buff,"");
+                                contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
+
+                                int cc = str_to_int(buff);
+                                if(cc<0){
+                                    printf("c: errore nella conversione di un file letto da pipe\n");
+                                    printf("sezione file %s\n",files[id_file]);
+                                } else {
+                                    val_per_file[id_file][j]+=cc;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 close(pipes[k][READ_P]);
             }
         }
         //prepara la lista di argomenti e avvia p
         else{
 
-            char arg_n[int_len(n)];
-            char arg_m[int_len(m)];
+            char *arg_n=(char *)calloc(int_len(n),sizeof(char));
+            char *arg_m=(char *)calloc(int_len(m),sizeof(char));
 
             //i contiene il numero del gruppo di file a questo punto
             sprintf(arg_n,"%d",i);
@@ -200,7 +243,7 @@ int main(int argc, char *argv[]) {
             argv_p[4]=arg_m;
             argv_p[5]="-f";
 
-            int j=6;
+            j=6;
 
             for(i=first_file;i<last_file;i++){
                 argv_p[j]=files[i];
@@ -217,24 +260,38 @@ int main(int argc, char *argv[]) {
             printf("%s\n",strerror(errno));
             return -1;
         }
-        int j=0;
+
         int ctr = open("report.txt",O_WRONLY|O_CREAT,S_IRWXU);
+
         for(j=0;j<N_CARATTERI;j++){
-            //char ascii[5];
+            char *line=(char *)calloc(int_len(j)+int_len(caratteri[j])+2,sizeof(char));
+            sprintf(line,"%d %d\n",j,caratteri[j]);
+            write(ctr,line,strlen(line));
+            free(line);
+            /*
             char *ascii=(char*)calloc(int_len(j),sizeof(char));
-            //strcpy(ascii,"");
-            //char ricc[10];
             char *ricc=(char*)calloc(int_len(caratteri[j]),sizeof(char));
-            //strcpy(ricc,"");
             sprintf(ascii,"%d",j);
             sprintf(ricc,"%d",caratteri[j]);
-            //printf("%d %d\n",j,caratteri[j]);
             write(ctr,ascii,strlen(ascii));
             write(ctr," ",strlen(" "));
             write(ctr,ricc,strlen(ricc));
             write(ctr,"\n",strlen("\n"));
+
             free(ascii);
             free(ricc);
+            */
+        }
+
+        for(i=0;i<ct;i++){
+            write(ctr,files[i],strlen(files[i]));
+            write(ctr,"\n",strlen("\n"));
+            for(j=0;j<N_CARATTERI;j++){
+                char *line=(char *)calloc(int_len(j)+int_len(val_per_file[i][j])+2,sizeof(char));
+                sprintf(line,"%d %d\n",j,val_per_file[i][j]);
+                write(ctr,line,strlen(line));
+                free(line);
+            }
         }
         close(ctr);
         free(files);

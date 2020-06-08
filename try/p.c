@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
             controllo =1;
             if((n = str_to_int(argv[i+1])) == -1){
                 //stampa errori
+                printf("p: errore nel parametro n\n");
                 exit(-1);
             }
             i++;
@@ -55,6 +56,7 @@ int main(int argc, char *argv[]) {
             controllo =1;
             if((m = str_to_int(argv[i+1])) == -1){
                 //stampa errori
+                printf("p: errore nel parametro m\n");
                 exit(-1);
             }
             i++;
@@ -86,6 +88,16 @@ int main(int argc, char *argv[]) {
         //tiene salvata una pipe per ogni sottoprocesso, utilizzando map_pipes per identificarle
         int pipes[(argc-6)*m][2];
         int map_pipes[(argc-6)*m];
+
+        //valori dei caratteri suddivisi per file
+        int val_per_file[argc-6][N_CARATTERI];
+        int k=0;
+        for(i=0;i<argc-6;i++){
+            for(k=0;k<N_CARATTERI;k++){
+                val_per_file[i][k]=0;
+            }
+        }
+
         //conta il numero di pipe presenti
         int c_pipes =0;
 
@@ -123,30 +135,48 @@ int main(int argc, char *argv[]) {
                         k=j;
                     }
                 }
+                int ln_lett;
+                char buff[100];
+                strcpy(buff,"");
+                //legge l'id del file
+                int contr= read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
+                if(contr<0){
+                    printf("p: errore lettura id file dalla pipe\n");
+                    //exit(-1);
+                } else {
+                    int id_f = str_to_int(buff);
+                    if(id_f<0){
+                        printf("p: errore conversione id file\n");
+                        exit(-1);
+                    }else{
+                        for(j=0;j<N_CARATTERI;j++){
+                            strcpy(buff,"");
+                            contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
+                            if(contr>=0){
+                                int cc=str_to_int(buff);
+                                if(cc<0){
+                                    printf("p: errore conversione\n");
+                                }else{
+                                    caratteri[j]+=cc;
+                                    val_per_file[id_f][j]+=cc;
+                                }
 
-                for(j=0;j<N_CARATTERI;j++){
-                    int ln_lett;
-                    char buff[100];
-                    strcpy(buff,"");
-                    int contr = read_until_char(pipes[k][READ_P],'\n',buff,&ln_lett);
-                    if(contr>=0){
-                        int cc=str_to_int(buff);
-                        if(cc<0){
-                            printf("dioc\n");
-                        }else{
-                            caratteri[j]+=cc;
+                            } else {
+                                printf("p: errore lettura valore da pipe\n");
+                                printf("appartenente al file %s\n",paths[id_f]);
+                                exit(-1);
+                            }
                         }
-
                     }
                 }
                 close(pipes[k][READ_P]);
             }
         } else{
-            char arg_n[int_len(n)+int_len(i)];
-            char arg_m[int_len(m)];
-            char arg_c[int_len(tmp_m)];
+            char *arg_n=(char *)calloc(int_len(i),sizeof(char));
+            char *arg_m=(char *)calloc(int_len(m),sizeof(char));
+            char *arg_c=(char *)calloc(int_len(tmp_m),sizeof(char));
             //al parametro n passa il numero del gruppo e il numero di file (n i)
-            sprintf(arg_n,"%d%d",n,i);
+            sprintf(arg_n,"%d",(i-1));
             sprintf(arg_m,"%d",m);
             sprintf(arg_c,"%d",tmp_m);
 
@@ -158,11 +188,20 @@ int main(int argc, char *argv[]) {
         }
 
         for(i=0;i<N_CARATTERI;i++){
-            char *buff=(char *)calloc(int_len(caratteri[i]),sizeof(char));
-            sprintf(buff,"%d",caratteri[i]);
+            char *buff=(char *)calloc(int_len(caratteri[i])+1,sizeof(char));
+            sprintf(buff,"%d\n",caratteri[i]);
             write(5,buff,strlen(buff));
-            write(5,"\n",1);
             free(buff);
+        }
+        for(k=0;k<argc-6;k++){
+            write(5,paths[k],strlen(paths[k]));
+            write(5,"\n",1);
+            for(i=0;i<N_CARATTERI;i++){
+                char *buff=(char *)calloc(int_len(val_per_file[k][i])+1,sizeof(char));
+                sprintf(buff,"%d\n",val_per_file[k][i]);
+                write(5,buff,strlen(buff));
+                free(buff);
+            }
         }
         close(PIPE_CHANNEL);
 
