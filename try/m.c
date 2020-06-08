@@ -79,13 +79,13 @@ int main(int argc, char *argv[]) {
             int cont=0;
             pipe(pip_f);
             printf("\n  elencare i file da analizzare\n");
-            printf("  digitare q per terminare\n\n");
+            printf("  lasciare la riga vuota per terminare\n\n");
             char *in=(char*)calloc(PATH_MAX,sizeof(char));
             strcpy(in,"not q");
-            while(strcmp(in,"q")!=0){
+            while(strcmp(in,"")!=0){
                 printf("> ");
                 in = read_input();
-                if(strcmp(in,"q")!=0){
+                if(strcmp(in,"")!=0){
                     struct stat buff;
                     int contr = stat(in,&buff);
                     if(contr<0){
