@@ -19,7 +19,7 @@
 /*
 prende in input un file .txt e scrive un file qnm.txt
 inserendo il numero di ricorrenze dei caratteri ascii
-nel file di input, considera tutti e 256 i caratteri
+nel file di input, considera tutti e 128 i caratteri
 il formato di output è:
 
 ascii ricorrenza \n
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]){
     //
 
     //inorridisco ma intanto ok
-    int caratteri[256]={[0 ... 255]=0};
+    int caratteri[N_CARATTERI]={[0 ... N_CARATTERI-1]=0};
 
     char *rff = (char *)calloc(len_file,sizeof(char));
     int rd=0;
@@ -138,43 +138,28 @@ int main(int argc, char *argv[]){
     }
 
     rd = read(finput,rff,len_parti);
-    /*
-    if(rd<0){
-        printf("read q: %s\n",strerror(errno));
-    }
-    else if(rd==0){
-        printf("letto nulla\n");
-    }
-    else {
-        printf("leggo %d\n",rd);
-    }
-    */
-    //printf("pid: %d -> %s\n\n",getpid(),rff);
+
     for(i=0;i<rd;i++){
         caratteri[rff[i]]++;
     }
-/*
-    for(i=0;i<256;i++){
-        printf("%d\n",caratteri[i]);
-    }
-    */
+
     free(rff);
     close(finput);
 
     //
     //scrittura del risultato sul canale d'uscita
     //
-//if(rd>0){
-    for(i=0;i<256;i++){
+
+    for(i=0;i<N_CARATTERI;i++){
         char buff[100];
         strcpy(buff,"");
-        sprintf(buff,"%d",caratteri[i]);
+        sprintf(buff,"%d\n",caratteri[i]);
         //strcat(buff,"\n");
         write(PIPE_CHANNEL,buff,strlen(buff));
-        write(PIPE_CHANNEL,"\n",1);
+        //write(PIPE_CHANNEL,"\n",1);
         //free(buff);
     }
-//}
+
     close(PIPE_CHANNEL);
 
     return 0;

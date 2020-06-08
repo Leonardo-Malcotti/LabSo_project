@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
         //e ct contiene il numero di file passati tra cartelle e non
         //quindi adesso si possono salvare gli indirizzi
         char **files = (char **)malloc(ct*PATH_MAX*sizeof(char));
-        int caratteri[256]={[0 ... 255]=0};
+        int caratteri[N_CARATTERI]={[0 ... N_CARATTERI-1]=0};
         int k=pos_files;
 
         int p=0;
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
                         k=j;
                     }
                 }
-                for(j=0;j<256;j++){
+                for(j=0;j<N_CARATTERI;j++){
                     int ln_lett;
                     char buff[COSTANTE_LIMITE_TEMPORANEA];
                     strcpy(buff,"");
@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
         }
         int j=0;
         int ctr = open("report.txt",O_WRONLY|O_CREAT,S_IRWXU);
-        for(j=0;j<256;j++){
+        for(j=0;j<N_CARATTERI;j++){
             //char ascii[5];
             char *ascii=(char*)calloc(int_len(j),sizeof(char));
             //strcpy(ascii,"");
