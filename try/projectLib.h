@@ -75,4 +75,6 @@ int int_len(int arg);
 #define PIPE_CHANNEL 4
 #define COSTANTE_LIMITE_TEMPORANEA 100
 #define BUFFER_IN_LEN 256
+#define N_CARATTERI 128
+
 #endif

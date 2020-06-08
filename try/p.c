@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        int caratteri[256]={[0 ... 255]=0};
+        int caratteri[N_CARATTERI]={[0 ... N_CARATTERI-1]=0};
         if(pid!=0){
 
             for(i=0; i<c_pipes ;i++){
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                for(j=0;j<256;j++){
+                for(j=0;j<N_CARATTERI;j++){
                     int ln_lett;
                     char buff[100];
                     strcpy(buff,"");
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
             return -1;
         }
 
-        for(i=0;i<256;i++){
+        for(i=0;i<N_CARATTERI;i++){
             char *buff=(char *)calloc(int_len(caratteri[i]),sizeof(char));
             sprintf(buff,"%d",caratteri[i]);
             write(5,buff,strlen(buff));
