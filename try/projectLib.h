@@ -66,10 +66,14 @@ int int_len(int arg);
 //aggiorna il valore di stat in base al carattere
 void char_type(int *stat,int *caratteri,int j);
 
+//controlla se il char passato è una lettera minuscola
 int is_min(char j);
 
+//restituisce un valore simbolico in base alla categoria di char
 int ret_char_type(char j);
 
+
+//funzioni di comodo per stampare le tabelle del report
 void r_stampa_tutto(int *valori);
 
 void r_stampa_consonanti(int *valori);
@@ -80,6 +84,8 @@ void r_stampa_numeri(int *valori);
 
 void r_stampa_punteggiatura(int *valori);
 
+char * dir_corrente();
+
 #define ARG_N 0
 #define ARG_M 1
 #define ARG_F 2
@@ -89,7 +95,6 @@ void r_stampa_punteggiatura(int *valori);
 #define READ_P 0
 
 #define PIPE_CHANNEL 4
-#define COSTANTE_LIMITE_TEMPORANEA 100
 #define BUFFER_IN_LEN 256
 #define N_CARATTERI 128
 

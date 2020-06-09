@@ -30,6 +30,10 @@ int main(int argc, char *argv[]) {
     //serve a contare i file specificati
     int ct=0;
 
+    //recupera la direcory corrente
+    char *wd=(char*)calloc(PATH_MAX,sizeof(char));
+    wd=dir_corrente();
+
     int contr_arg[3] = {0,0,0};
 
     //tiene traccia di dove inizia la lista di file in argv
@@ -88,16 +92,16 @@ int main(int argc, char *argv[]) {
         }
 
         if(controllo == 0){
-            printf("parametri non validi\n");
+            printf("c: parametri non validi\n");
             exit(-1);
         }
 
     }
 
 
-
-
     if(ct>0){
+
+
         //una volta letti i parametri siamo sicuri che siano stati specificati correttamente
         //e ct contiene il numero di file passati tra cartelle e non
         //quindi adesso si possono salvare gli indirizzi
@@ -115,7 +119,11 @@ int main(int argc, char *argv[]) {
 
         int p=0;
         while(k+1 < argc && argv[k+1][0]!='-'){
-            char *tmp_path = argv[k+1];
+            char *tmp = (char *)calloc(PATH_MAX,sizeof(char));
+            strcpy(tmp,wd);
+            strcat(tmp,"/");
+            strcat(tmp,argv[k+1]);
+            char *tmp_path = tmp;
             if(is_dir(tmp_path)==1){
                 //se è una directory allora cerca tutti i file nelle sottodirectory se ci sono
                 files_in_dir_subdir(tmp_path,&p,files);
@@ -126,6 +134,16 @@ int main(int argc, char *argv[]) {
             k++;
         }
 
+        for(i=0;i<ct;i++){
+            for(j=0;j<ct;j++){
+                if(i!=j){
+                    if(strcmp(files[i],files[j])==0){
+                        printf("c: hai inserito più volte lo stesso file\n");
+                        exit(-1);
+                    }
+                }
+            }
+        }
 
         int pid= -1;
 
@@ -260,7 +278,7 @@ int main(int argc, char *argv[]) {
             printf("%s\n",strerror(errno));
             return -1;
         }
-
+        //remove("report.txt");
         int ctr = open("report.txt",O_WRONLY|O_CREAT,S_IRWXU);
         int stat[8]={[0 ... 7]=0};
         char parole[8][20]={"TOTALE","MAIUSCOLE","MINUSCOLE","CONSONANTI","VOCALI","PUNTEGGIATURA","SPECIALI","NUMERI"};
@@ -278,14 +296,12 @@ int main(int argc, char *argv[]) {
 
         for(j=0;j<N_CARATTERI;j++){
             char *line=(char *)calloc(int_len(j)+int_len(caratteri[j])+13,sizeof(char));
-            //double perc = (stat[TOTALE]==0)? 0.0 : ((double)caratteri[j]/stat[TOTALE])*100.0;
             sprintf(line,"%d %d\n",j,caratteri[j]);
             write(ctr,line,strlen(line));
             free(line);
         }
         for(i=0;i<8;i++){
             char *parola=(char*)calloc(20+int_len(stat[i])+13,sizeof(char));
-            //double perc = (stat[TOTALE]==0)? 0.0 : ((double)stat[i]/stat[TOTALE])*100.0;
             sprintf(parola,"%s %d\n",parole[i],stat[i]);
             write(ctr,parola,strlen(parola));
             free(parola);
@@ -307,14 +323,12 @@ int main(int argc, char *argv[]) {
 
             for(j=0;j<N_CARATTERI;j++){
                 char *line=(char *)calloc(int_len(j)+int_len(val_per_file[i][j])+13,sizeof(char));
-                //double perc = (stat[TOTALE]==0)? 0.0 : ((double)val_per_file[i][j]/stat[TOTALE])*100.0;
                 sprintf(line,"%d %d\n",j,val_per_file[i][j]);
                 write(ctr,line,strlen(line));
                 free(line);
             }
             for(j=0;j<8;j++){
                 char *parola=(char*)calloc(20+int_len(stat[j])+13,sizeof(char));
-                //double perc = (stat[TOTALE]==0)? 0 : ((double)stat[j]/stat[TOTALE])*100.0;
                 sprintf(parola,"%s %d\n",parole[j],stat[j]);
                 write(ctr,parola,strlen(parola));
                 free(parola);

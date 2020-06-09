@@ -124,7 +124,7 @@ int main(int argc, char *argv[]){
     //Analisi del file
     //
 
-    
+
     int caratteri[N_CARATTERI]={[0 ... N_CARATTERI-1]=0};
 
     char *rff = (char *)calloc(len_file,sizeof(char));

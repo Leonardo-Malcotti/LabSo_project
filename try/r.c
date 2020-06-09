@@ -29,6 +29,10 @@ int main(int argc, char *argv[]) {
 
     int i,x,j;//indice per i for
 
+    //recupera la direcory corrente
+    char *wd=(char*)calloc(PATH_MAX,sizeof(char));
+    wd=dir_corrente();
+
     char buf[PATH_MAX];
     strcpy(buf,"");
     int contr,len;
@@ -61,14 +65,7 @@ int main(int argc, char *argv[]) {
             controllo =1;
             pos_files=i;
             while(i+1 < argc && argv[i+1][0]!='-'){
-                char *tmp_path = argv[i+1];
-                int contr = is_dir(tmp_path);
-                if(contr==1){
-                    printf("valore non valido, %s è una cartella\n",tmp_path);
-                    exit(-1);
-                } else {
-                    ct++;
-                }
+                ct++;
                 i++;
             }
         }
@@ -129,9 +126,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    char gruppi[8][20]={"TOTALE","MAIUSCOLE","MINUSCOLE","CONSONANTI","VOCALI","PUNTEGGIATURA","SPECIALI","NUMERI"};
-    char caratteri1 [33][4] = {"nul","soh","stx","etx","eot","enq","ack","bel","bs","ht","nl","vt","ff","cr","so","si","dle","dc1","dc2","dc3","dc4","nak","syn","etb","can","em","sub","esc","fs","gs","rs","us","sp"};
-
     strcpy(buf,"");
     contr=read_until_char(finput,'\n',buf,&len);
     int n_file_analizzati=str_to_int(buf);
@@ -146,9 +140,23 @@ int main(int argc, char *argv[]) {
     int k=pos_files;
     i=0;
     while(k+1 < argc && argv[k+1][0]!='-'){
-        files[i]=strdup(argv[k+1]);
+        strcpy(buf,wd);
+        strcat(buf,"/");
+        strcat(buf,argv[k+1]);
+        files[i]=strdup(buf);
         i++;
         k++;
+    }
+
+    for(i=0;i<ct;i++){
+        for(j=0;j<ct;j++){
+            if(i!=j){
+                if(strcmp(files[i],files[j])==0){
+                    printf("r: hai specificato più volte lo stesso file\n");
+                    exit(-1);
+                }
+            }
+        }
     }
 
     //
@@ -201,6 +209,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    int file_trovati=0;
     for(j=0;j<n_file_analizzati;j++){
         strcpy(buf,"");
         contr = read_until_char(finput,'\n',buf,&len);
@@ -209,6 +218,7 @@ int main(int argc, char *argv[]) {
         for(x=0; x<ct && id_file==-1 ;x++){
             if(strcmp(files[x],buf)==0){
                 id_file=x;
+                file_trovati++;
             }
         }
         //se non è tra i file di cui stampare il report salta la sezione di file
@@ -265,6 +275,10 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    if(file_trovati!=ct){
+        printf("r: uno dei file specificati non è presente nel report\n");
+        exit(-1);
+    }
     //
     //stampa tabelle generali
     //
@@ -272,6 +286,7 @@ int main(int argc, char *argv[]) {
     if(contr_arg[G]==0){
         printf("REPORT\n\nGeneral statistics:\n");
         int cc=0;
+        //fa controlli sulle flag dei parametri per decidere cosa stampare
         if(contr_arg[C]==1){
             cc=1;
             printf("consonanti\n");
@@ -297,14 +312,7 @@ int main(int argc, char *argv[]) {
             printf("\n");
         }
         if(cc==0){
-            printf("\033[0;31m");
-            for(x=0;x<8;x++){
-                printf("| char ");
-                printf("  freq ");
-                printf("     %% |");
-            }
-            printf("\033[0m");
-            printf("\n");
+
             r_stampa_tutto(val_gen);
         }
     }
@@ -318,6 +326,7 @@ int main(int argc, char *argv[]) {
             printf("%s\n",files[x]);
             printf("\033[0m");
             int cc=0;
+            //fa controlli sulle flag dei parametri per decidere cosa stampare
             if(contr_arg[C]==1){
                 cc=1;
                 printf("consonanti\n");

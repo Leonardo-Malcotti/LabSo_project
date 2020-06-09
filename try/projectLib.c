@@ -22,6 +22,7 @@ char *arr_param[] = {"-n","-m","-f","-c"};
 char caratteri1 [33][4] = {"nul","soh","stx","etx","eot","enq","ack","bel","bs","ht","nl","vt","ff","cr","so","si","dle","dc1","dc2","dc3","dc4","nak","syn","etb","can","em","sub","esc","fs","gs","rs","us","sp"};
 char gruppi[8][20]={"TOTALE","MAIUSCOLE","MINUSCOLE","CONSONANTI","VOCALI","PUNTEGGIATURA","SPECIALI","NUMERI"};
 
+
 void print_p_help(){
     printf("\n");
     printf("-f  indica il percorso del file di input.\n");
@@ -68,7 +69,9 @@ void print_m_help(){
     printf("\n    per modificare n e m è possibile usare la forma contratta\n");
     printf("    specificando il valore desiderato sulla stessa riga del comando suddiviso da uno spazio\n");
     printf("\n  --conteggio:\n");
-    printf("    c : avvia il conteggio con i parametri di default\n");
+    printf("    c, count: avvia il conteggio con i parametri di default\n");
+    printf("\n  --report:\n");
+    printf("    r, report: stampa a video il report del conteggio\n");
     printf("\n");
 }
 
@@ -226,7 +229,7 @@ int n_files_in_dir(char * path){
     close(pip[WRITE_P]);
 
     //salva in una stringa (buf) il contenuto della prima riga della pipe
-    char buf[COSTANTE_LIMITE_TEMPORANEA];
+    char buf[100];
     strcpy(buf,"");
     int len_buf;
     contr = read_until_char(pip[READ_P],'\n',buf,&len_buf);
@@ -338,6 +341,7 @@ char * read_input(){
     return s;
 }
 
+
 int int_len(int arg){
     double tmp = arg;
     int ret=0;
@@ -375,6 +379,7 @@ void char_type(int *stat,int *caratteri,int j){
     }
 }
 
+
 int is_min(char j){
     if(j<=90 && j>=65){
         return 1;
@@ -383,6 +388,7 @@ int is_min(char j){
     }
     return -1;
 }
+
 
 int ret_char_type(char j){
     if((j<=90 && j>=65)||(j<=122 && j>=97))
@@ -405,6 +411,7 @@ int ret_char_type(char j){
     }
 }
 
+
 void r_stampa_tutto(int *valori){
     int i,j;
     int totale = valori[128];
@@ -425,7 +432,7 @@ void r_stampa_tutto(int *valori){
 
             printf(" %5d ",valori[(i*8)+j]);
             perc = (totale==0)? 0 : ((double)valori[(i*8)+j]/totale)*100.0;
-            printf(" %5.2f |",perc);
+            printf(" %5.2f%% |",perc);
         }
         printf("\n");
 	}
@@ -444,12 +451,13 @@ void r_stampa_tutto(int *valori){
         printf("\033[0m");
 
         printf(" %2d ",valori[j]);
-        perc = (totale==0)? 0 : ((double)valori[(i*8)+j]/totale)*100.0;
-        printf(" %5.2f\n",perc);
+        perc = (totale==0)? 0 : ((double)valori[j]/totale)*100.0;
+        printf(" %5.2f%%\n",perc);
 
     }
     printf("\n");
 }
+
 
 void r_stampa_consonanti(int *valori){
     int i,j;
@@ -486,6 +494,7 @@ void r_stampa_consonanti(int *valori){
     }
 }
 
+
 void r_stampa_vocali(int *valori){
     int i,j;
     int x=0;
@@ -517,6 +526,7 @@ void r_stampa_vocali(int *valori){
     printf("\n");
 }
 
+
 void r_stampa_numeri(int *valori){
     int i,j;
     int x=0;
@@ -538,6 +548,7 @@ void r_stampa_numeri(int *valori){
     }
 }
 
+
 void r_stampa_punteggiatura(int *valori){
     int i,j;
     int x=0;
@@ -556,4 +567,18 @@ void r_stampa_punteggiatura(int *valori){
     }
     printf("\n");
 
+}
+
+
+char * dir_corrente(){
+    int pip_pwd[2];
+    if(pipe_system_command(pip_pwd,"pwd")<0){
+        return NULL;
+    }
+    char *wd=(char*)calloc(PATH_MAX,sizeof(char));
+    int len_wd;
+    if(read_until_char(pip_pwd[READ_P],'\n',wd,&len_wd)<0){
+        return NULL;
+    }
+    return wd;
 }

@@ -74,7 +74,10 @@ int main(int argc, char *argv[]) {
         }
 
         //comando verboso per l'avvio di c
-        if(strcmp(s,"c")==0){
+        if(strcmp(s,"c")==0 || strcmp(s,"counter")==0){
+            printf("\n  valori in utilizzo:\n");
+            printf("  n : %d\n",def_n);
+            printf("  m : %d\n",def_m);
             int pip_f[2];
             int cont=0;
             pipe(pip_f);
@@ -147,7 +150,8 @@ int main(int argc, char *argv[]) {
             cmd_valido=1;
         }
 
-        if(strcmp(s,"r")==0){
+        //comando per la stampa del report
+        if(strcmp(s,"r")==0 || strcmp(s,"report")==0){
             char *in=(char*)calloc(PATH_MAX,sizeof(char));
             strcpy(in,"not q");
             int arg_par[4]={0,0,0,0};
@@ -243,29 +247,29 @@ int main(int argc, char *argv[]) {
                     wait(NULL);
                 }
             } else {
+                int indice;
+                char ** argv_c =(char **)calloc((cont+8),sizeof(char)*PATH_MAX);
+                argv_c[0]="r";
+                indice=1;
+                if(arg_par[0]==1){
+                    argv_c[indice]="-c";
+                    indice++;
+                }
+                if(arg_par[1]==1){
+                    argv_c[indice]="-v";
+                    indice++;
+                }
+                if(arg_par[2]==1){
+                    argv_c[indice]="-n";
+                    indice++;
+                }
+                if(arg_par[3]==1){
+                    argv_c[indice]="-p";
+                    indice++;
+                }
+                argv_c[cont+indice]=(char *)NULL;
                 int id = fork();
                 if(id==0){
-                    int indice;
-                    char ** argv_c =(char **)calloc((cont+8),sizeof(char)*PATH_MAX);
-                    argv_c[0]="r";
-                    indice=1;
-                    if(arg_par[0]==1){
-                        argv_c[indice]="-c";
-                        indice++;
-                    }
-                    if(arg_par[1]==1){
-                        argv_c[indice]="-v";
-                        indice++;
-                    }
-                    if(arg_par[2]==1){
-                        argv_c[indice]="-n";
-                        indice++;
-                    }
-                    if(arg_par[3]==1){
-                        argv_c[indice]="-p";
-                        indice++;
-                    }
-                    argv_c[cont+indice]=(char *)NULL;
                     execvp("./r",(char *const*)argv_c);
                     return -1;
                 } else {
