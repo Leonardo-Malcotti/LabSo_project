@@ -19,7 +19,8 @@
 
 //Array universale per i parametri, da accedere utilizzando le costanti ARG_*
 char *arr_param[] = {"-n","-m","-f","-c"};
-
+char caratteri1 [33][4] = {"nul","soh","stx","etx","eot","enq","ack","bel","bs","ht","nl","vt","ff","cr","so","si","dle","dc1","dc2","dc3","dc4","nak","syn","etb","can","em","sub","esc","fs","gs","rs","us","sp"};
+char gruppi[8][20]={"TOTALE","MAIUSCOLE","MINUSCOLE","CONSONANTI","VOCALI","PUNTEGGIATURA","SPECIALI","NUMERI"};
 
 void print_p_help(){
     printf("\n");
@@ -351,7 +352,7 @@ void char_type(int *stat,int *caratteri,int j){
     stat[TOTALE]+=caratteri[j];
     if((j<=90 && j>=65)||(j<=122 && j>=97))
     {
-      if(j==65 ||j==69 ||j==73 ||j==78 ||j==85 ||j==97 ||j==101 ||j==105 ||j==111||j==117){
+      if(j==65 ||j==69 ||j==73 ||j==79 ||j==85 ||j==97 ||j==101 ||j==105 ||j==111||j==117){
         stat[VOCALI]+=caratteri[j];
       }
       else{
@@ -372,4 +373,187 @@ void char_type(int *stat,int *caratteri,int j){
     else{
       stat[SPECIALI]+=caratteri[j];
     }
+}
+
+int is_min(char j){
+    if(j<=90 && j>=65){
+        return 1;
+    }else{
+        return 0;
+    }
+    return -1;
+}
+
+int ret_char_type(char j){
+    if((j<=90 && j>=65)||(j<=122 && j>=97))
+    {
+        if(j==65 ||j==69 ||j==73 ||j==79 ||j==85 ||j==97 ||j==101 ||j==105 ||j==111||j==117){
+            return VOCALI;
+        }
+        else{
+            return CONSONANTI;
+        }
+    }
+    else if(j==','||j=='.'||j==';'||j==':'||j=='?'||j=='!'||j=='"'){
+        return PUNTEGGIATURA;
+    }
+    else if(j<=57 && j>=48){
+        return NUMERI;
+    }
+    else{
+        return SPECIALI;
+    }
+}
+
+void r_stampa_tutto(int *valori){
+    int i,j;
+    int totale = valori[128];
+    double perc;
+    for(i=0;i<16;i++){
+        //divide in 8 colonne
+        for(j=0;j<8;j++){
+
+            if((i*8)+j<33){
+                printf("|%5s ",caratteri1[(i*8)+j]);
+            }
+            else if((i*8)+j==127) {
+                printf("|  del ");
+            }
+            else{
+                 printf("|%5c ",(i*8)+j);
+            }
+
+            printf(" %5d ",valori[(i*8)+j]);
+            perc = (totale==0)? 0 : ((double)valori[(i*8)+j]/totale)*100.0;
+            printf(" %5.2f |",perc);
+        }
+        printf("\n");
+	}
+    //stampa statistiche su categorie di caratteri
+    printf("Categorie caratteri:\n");
+    printf("\033[0;31m");
+    printf("    categoria ");
+    printf("  freq ");
+    printf("      %% ");
+    printf("\033[0m");
+    printf("\n");
+    for(j=N_CARATTERI;j<N_CARATTERI+8;j++){
+
+        printf("\033[0;32m");
+        printf("%13s\t",gruppi[j-N_CARATTERI]);
+        printf("\033[0m");
+
+        printf(" %2d ",valori[j]);
+        perc = (totale==0)? 0 : ((double)valori[(i*8)+j]/totale)*100.0;
+        printf(" %5.2f\n",perc);
+
+    }
+    printf("\n");
+}
+
+void r_stampa_consonanti(int *valori){
+    int i,j;
+    int x=0;
+    int totale = valori[128];
+    double perc;
+    //stampa minuscole
+    for(i=0;i<3;i++){
+        for(j=0;j<7;j++){
+            while(!(ret_char_type(x)==CONSONANTI && is_min(x)==0)){
+                x++;
+            }
+            printf("|%5c ",x);
+            printf(" %5d ",valori[x]);
+            perc = (totale==0)? 0 : ((double)valori[x]/totale)*100.0;
+            printf(" %5.2f%% |",perc);
+            x++;
+        }
+        printf("\n");
+    }
+    x=0;
+    for(i=0;i<3;i++){
+        for(j=0;j<7;j++){
+            while(!(ret_char_type(x)==CONSONANTI && is_min(x)==1)){
+                x++;
+            }
+            printf("|%5c ",x);
+            printf(" %5d ",valori[x]);
+            perc = (totale==0)? 0 : ((double)valori[x]/totale)*100.0;
+            printf(" %5.2f%% |",perc);
+            x++;
+        }
+        printf("\n");
+    }
+}
+
+void r_stampa_vocali(int *valori){
+    int i,j;
+    int x=0;
+    int totale = valori[128];
+    double perc;
+    //stampa minuscole
+    for(j=0;j<5;j++){
+        while(!(ret_char_type(x)==VOCALI && is_min(x)==0)){
+            x++;
+        }
+        printf("|%5c ",x);
+        printf(" %5d ",valori[x]);
+        perc = (totale==0)? 0 : ((double)valori[x]/totale)*100.0;
+        printf(" %5.2f%% |",perc);
+        x++;
+    }
+    printf("\n");
+    x=0;
+    for(j=0;j<5;j++){
+        while(!(ret_char_type(x)==VOCALI && is_min(x)==1)){
+            x++;
+        }
+        printf("|%5c ",x);
+        printf(" %5d ",valori[x]);
+        perc = (totale==0)? 0 : ((double)valori[x]/totale)*100.0;
+        printf(" %5.2f%% |",perc);
+        x++;
+    }
+    printf("\n");
+}
+
+void r_stampa_numeri(int *valori){
+    int i,j;
+    int x=0;
+    int totale = valori[128];
+    double perc;
+    //stampa minuscole
+    for(i=0;i<2;i++){
+        for(j=0;j<5;j++){
+            while(!(ret_char_type(x)==NUMERI)){
+                x++;
+            }
+            printf("|%5c ",x);
+            printf(" %5d ",valori[x]);
+            perc = (totale==0)? 0 : ((double)valori[x]/totale)*100.0;
+            printf(" %5.2f%% |",perc);
+            x++;
+        }
+        printf("\n");
+    }
+}
+
+void r_stampa_punteggiatura(int *valori){
+    int i,j;
+    int x=0;
+    int totale = valori[128];
+    double perc;
+    //stampa minuscole
+    for(j=0;j<7;j++){
+        while(!(ret_char_type(x)==PUNTEGGIATURA)){
+            x++;
+        }
+        printf("|%5c ",x);
+        printf(" %5d ",valori[x]);
+        perc = (totale==0)? 0 : ((double)valori[x]/totale)*100.0;
+        printf(" %5.2f%% |",perc);
+        x++;
+    }
+    printf("\n");
+
 }

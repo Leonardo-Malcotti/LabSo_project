@@ -18,227 +18,337 @@
 #include <math.h>
 #include "projectLib.h"
 
+#define F 0
+#define G 1
+#define C 2
+#define V 3
+#define N 4
+#define P 5
+
 int main(int argc, char *argv[]) {
-    char caratteri1 [33][4] = {"nul","soh","stx","etx","eot","enq","ack","bel","bs","ht","nl","vt","ff","cr","so","si","dle","dc1","dc2","dc3","dc4","nak","syn","etb","can","em","sub","esc","fs","gs","rs","us","sp"};
-    int i,x;//indice per i for
-    int finput,len_file;
-    char buf[100];
+
+    int i,x,j;//indice per i for
+
+    char buf[PATH_MAX];
     strcpy(buf,"");
     int contr,len;
-    int j;
     int tmp;
 
+    int contr_arg[6]={0,0,0,0,0,0};
+
     //apertura file
+    int finput,len_file;
     if((finput=open_file("report.txt",&len_file))==-1){
-                //stampa errori
+        printf("r: file di report non trovato\n");
         exit(-1);
     }
-    //REPORT GENERALE
-    //legge il file e stampa a mo' di tabella
-    //a sinistra il valore ascii a destra la quantità e percentuale
-    //intestazione
-    printf("REPORT\n\nGeneral statistics:\n");
-    printf("\033[0;31m");
-    for(x=0;x<8;x++){
-        printf("| char ");
-        printf("  freq ");
-        printf("     %% |");
-    }
-    printf("\033[0m");
-    printf("\n");
-  
 
-    //legge il file e stampa a mo' di tabella
-    //a sinistra il valore ascii a destra la quantità e percentuale
-	for(i=0;i<16;i++){
-        //divide in 8 colonne
-        for(j=0;j<8;j++){
-            //legge il primo valore, che è prima dello spazio
-            contr = read_until_char(finput,' ',buf,&len);
-            if(contr<0){
-                //errore nella lettura
+    int pos_files;
+    int ct;
+
+    for(i=1;i<argc;i++){
+        //viene posto ad 1 se viene letto un parametro corretto
+        int controllo = 0;
+
+        if(strcmp(argv[i],"-f") == 0){
+            //segnala che è stato letto un parametro valido
+            if(contr_arg[F]==1){
+                printf("r: errore nei parametri\n");
                 exit(-1);
             }
-            tmp=str_to_int(buf);
-            if(tmp<33){
-                printf("|%5s ",caratteri1[tmp]);
+            contr_arg[F]=1;
+
+            controllo =1;
+            pos_files=i;
+            while(i+1 < argc && argv[i+1][0]!='-'){
+                char *tmp_path = argv[i+1];
+                int contr = is_dir(tmp_path);
+                if(contr==1){
+                    printf("valore non valido, %s è una cartella\n",tmp_path);
+                    exit(-1);
+                } else {
+                    ct++;
+                }
+                i++;
             }
-            else if(tmp==127) {
-                printf("|  del ");
-            }
-            else{
-                 printf("|%5c ",tmp);
-            }
-            strcpy(buf,"");
-            //legge il secondo valore, che è prima dello spazio
-            contr = read_until_char(finput,' ',buf,&len);
-            if(contr<0){
-                //errore nella lettura
+        }
+
+        if(strcmp(argv[i],"-g")==0){
+            if(contr_arg[G]==1){
+                printf("r: errore nei parametri\n");
                 exit(-1);
             }
-            tmp=str_to_int(buf);
-            printf(" %5d ",tmp);
+            contr_arg[G]=1;
+
+            controllo =1;
+        }
+
+        if(strcmp(argv[i],"-c")==0){
+            if(contr_arg[C]==1){
+                printf("r: errore nei parametri\n");
+                exit(-1);
+            }
+            contr_arg[C]=1;
+
+            controllo =1;
+        }
+
+        if(strcmp(argv[i],"-v")==0){
+            if(contr_arg[V]==1){
+                printf("r: errore nei parametri\n");
+                exit(-1);
+            }
+            contr_arg[V]=1;
+
+            controllo =1;
+        }
+
+        if(strcmp(argv[i],"-n")==0){
+            if(contr_arg[N]==1){
+                printf("r: errore nei parametri\n");
+                exit(-1);
+            }
+            contr_arg[N]=1;
+
+            controllo =1;
+        }
+
+        if(strcmp(argv[i],"-p")==0){
+            if(contr_arg[P]==1){
+                printf("r: errore nei parametri\n");
+                exit(-1);
+            }
+            contr_arg[P]=1;
+
+            controllo =1;
+        }
+
+        if(controllo == 0){
+            printf("parametri non validi\n");
+            exit(-1);
+        }
+    }
+
+    char gruppi[8][20]={"TOTALE","MAIUSCOLE","MINUSCOLE","CONSONANTI","VOCALI","PUNTEGGIATURA","SPECIALI","NUMERI"};
+    char caratteri1 [33][4] = {"nul","soh","stx","etx","eot","enq","ack","bel","bs","ht","nl","vt","ff","cr","so","si","dle","dc1","dc2","dc3","dc4","nak","syn","etb","can","em","sub","esc","fs","gs","rs","us","sp"};
+
+    strcpy(buf,"");
+    contr=read_until_char(finput,'\n',buf,&len);
+    int n_file_analizzati=str_to_int(buf);
+    if(n_file_analizzati<1){
+        printf("r: errore nella lettura del primo parametro di report.txt\n");
+        exit(-1);
+    }
+    int val_gen[N_CARATTERI+8];
+    char **files=(char **)calloc(ct*PATH_MAX,sizeof(char));
+    int val_per_file[ct][N_CARATTERI+8];
+
+    int k=pos_files;
+    i=0;
+    while(k+1 < argc && argv[k+1][0]!='-'){
+        files[i]=strdup(argv[k+1]);
+        i++;
+        k++;
+    }
+
+    //
+    //lettura file di report e creazione matrici
+    //
+    for(i=0;i<N_CARATTERI;i++){
+        int car;
+        int val;
+        strcpy(buf,"");
+        contr = read_until_char(finput,' ',buf,&len);
+        if(contr<0){
+            //errore nella lettura
+            exit(-1);
+        }
+        car=str_to_int(buf);
+        if(car>=0){
             strcpy(buf,"");
-            //legge il terzo valore (percentuale), che è prima della fine della riga
             contr = read_until_char(finput,'\n',buf,&len);
             if(contr<0){
                 //errore nella lettura
                 exit(-1);
             }
-            printf(" %5.2f |",atof(buf));
-            strcpy(buf,"");
+            val=str_to_int(buf);
+            if(val>=0){
+                val_gen[car]=val;
+            }
+        }
+    }
 
-        }
-        printf("\n");
-	}
-    //stampa statistiche su categorie di caratteri
-    printf("Categorie caratteri:\n");
-    printf("\033[0;31m");
-    printf("    categoria ");
-    printf("  freq ");
-    printf("      %% ");
-    printf("\033[0m");
-    printf("\n");
-    for(j=0;j<8;j++){
-        //legge il primo valore, che è prima dello spazio
-        contr = read_until_char(finput,' ',buf,&len);
-        if(contr<0){
-            //errore nella lettura
-            exit(-1);
-        }
-        printf("\033[0;32m");
-        printf("%13s\t",buf);
-        printf("\033[0m");
+    for(i=N_CARATTERI;i<N_CARATTERI+8;i++) {
+
+        int val;
+        //lettura a vuoto
         strcpy(buf,"");
         contr = read_until_char(finput,' ',buf,&len);
         if(contr<0){
             //errore nella lettura
             exit(-1);
         }
-        tmp=str_to_int(buf);
-        printf(" %2d ",tmp);
+        //leggo il valore effettivo del gruppo
         strcpy(buf,"");
-        //legge il secondo valore, che è prima della fine della riga
         contr = read_until_char(finput,'\n',buf,&len);
         if(contr<0){
             //errore nella lettura
             exit(-1);
         }
-        printf("\t%3.2f\n",atof(buf));
-        strcpy(buf,"");
-
+        val=str_to_int(buf);
+        if(val>=0){
+            val_gen[i]=val;
+        }
     }
-    printf("\n");
-    
-    //REPORT PER FILE SPECIFICO SE RICHIESTO
-    int boolean;
-    int counter=0;
-    if(argc>2 && strcmp(argv[1],"-f")==0){
-        while(read_until_char(finput,'\n',buf,&len)!=-1)
-        {
-            i=2;
-            boolean=1;
-            while(boolean!=0 && i<argc)
-            {
-                if(strcmp(buf,argv[i])==0)
-                {
-                    counter++;
-                    boolean=0;
-                    printf("%s\n",argv[i]);
-                    printf("\033[0;31m");
-                    for(x=0;x<8;x++){
-                        printf("| char ");
-                        printf("  freq ");
-                        printf("    %% |");
-                    }
-                    printf("\033[0m");
-                    printf("\n");
-                    for(i=0;i<16;i++){
-                        //divide in 8 righe
-                        for(j=0;j<8;j++){
-                            //legge il primo valore, che è prima dello spazio
-                            contr = read_until_char(finput,' ',buf,&len);
-                            if(contr<0){
-                                //errore nella lettura
-                                exit(-1);
-                            }
-                            tmp=str_to_int(buf);
-                            if(tmp<33){
-                                printf("|%5s ",caratteri1[tmp]);
-                            }
-                            else if(tmp==127) {
-                                printf("|  del ");
-                            }
-                            else{
-                                printf("|%5c ",tmp);
-                            }
-                            strcpy(buf,"");
-                            contr = read_until_char(finput,' ',buf,&len);
-                            if(contr<0){
-                                //errore nella lettura
-                                exit(-1);
-                            }
-                            tmp=str_to_int(buf);
-                            printf(" %5d ",tmp);
-                            strcpy(buf,"");
-                            contr = read_until_char(finput,'\n',buf,&len);
-                            if(contr<0){
-                                //errore nella lettura
-                                exit(-1);
-                            }
-                            printf(" %5.2f |",atof(buf));
-                            strcpy(buf,"");
 
-                        }
-                        printf("\n");
-                    }
-                    //stampa statistiche su categorie di caratteri
-                    printf("Categorie caratteri:\n");
-                    printf("\033[0;31m");
-                    printf("    categoria ");
-                    printf("  freq ");
-                    printf("    %% ");
-                    printf("\033[0m");
-                    printf("\n");
-                    for(j=0;j<8;j++){
-                        //legge il primo valore, che è prima dello spazio
-                        contr = read_until_char(finput,' ',buf,&len);
-                        if(contr<0){
-                            //errore nella lettura
-                            exit(-1);
-                        }
-                        printf("\033[0;32m");
-                        printf("%13s\t",buf);
-                        printf("\033[0m");
-                        strcpy(buf,"");
-                        contr = read_until_char(finput,' ',buf,&len);
-                        if(contr<0){
-                            //errore nella lettura
-                            exit(-1);
-                        }
-                        tmp=str_to_int(buf);
-                        printf(" %2d ",tmp);
-                        strcpy(buf,"");
-                        contr = read_until_char(finput,'\n',buf,&len);
-                        if(contr<0){
-                            //errore nella lettura--
-                            exit(-1);
-                        }
-                        printf("\t%3.2f\n",atof(buf));
-                        strcpy(buf,"");
-                    }
-                    printf("\n");
-                }
-                i++;
+    for(j=0;j<n_file_analizzati;j++){
+        strcpy(buf,"");
+        contr = read_until_char(finput,'\n',buf,&len);
+
+        int id_file=-1;
+        for(x=0; x<ct && id_file==-1 ;x++){
+            if(strcmp(files[x],buf)==0){
+                id_file=x;
             }
         }
-        if(counter!=(argc-2)){
-            printf("Non tutti i report dei file richiesti sono stati stampati. Verificare la correttezza del nome dei file.\n");
+        //se non è tra i file di cui stampare il report salta la sezione di file
+        if(id_file==-1){
+            for(x=0;x<N_CARATTERI+8;x++){
+                strcpy(buf,"");
+                contr = read_until_char(finput,'\n',buf,&len);
+            }
+        }else{
+            for(i=0;i<N_CARATTERI;i++){
+                int car;
+                int val;
+                strcpy(buf,"");
+                contr = read_until_char(finput,' ',buf,&len);
+                if(contr<0){
+                    //errore nella lettura
+                    exit(-1);
+                }
+                car=str_to_int(buf);
+                if(car>=0){
+                    strcpy(buf,"");
+                    contr = read_until_char(finput,'\n',buf,&len);//fino a \n dopo
+                    if(contr<0){
+                        //errore nella lettura
+                        exit(-1);
+                    }
+                    val=str_to_int(buf);
+                    if(val>=0){
+                        val_per_file[id_file][car]=val;
+                    }
+                }
+            }
+            for(i=N_CARATTERI;i<N_CARATTERI+8;i++){
+                int val;
+                //lettura a vuoto
+                strcpy(buf,"");
+                contr = read_until_char(finput,' ',buf,&len);
+                if(contr<0){
+                    //errore nella lettura
+                    exit(-1);
+                }
+                //leggo il valore effettivo del gruppo
+                strcpy(buf,"");
+                contr = read_until_char(finput,'\n',buf,&len);
+                if(contr<0){
+                    //errore nella lettura
+                    exit(-1);
+                }
+                val=str_to_int(buf);
+                if(val>=0){
+                    val_per_file[id_file][i]=val;
+                }
+            }
         }
     }
-    else if(argc>=2 && strcmp(argv[1],"-f")!=0){
-        printf("Parametri non inseriti correttamente. Avviare il report con i giusti parametri.\n");
+
+    //
+    //stampa tabelle generali
+    //
+
+    if(contr_arg[G]==0){
+        printf("REPORT\n\nGeneral statistics:\n");
+        int cc=0;
+        if(contr_arg[C]==1){
+            cc=1;
+            printf("consonanti\n");
+            r_stampa_consonanti(val_gen);
+            printf("\n");
+        }
+        if(contr_arg[V]==1){
+            cc=1;
+            printf("vocali\n");
+            r_stampa_vocali(val_gen);
+            printf("\n");
+        }
+        if(contr_arg[N]==1){
+            cc=1;
+            printf("numeri\n");
+            r_stampa_numeri(val_gen);
+            printf("\n");
+        }
+        if(contr_arg[P]==1){
+            cc=1;
+            printf("punteggiatura\n");
+            r_stampa_punteggiatura(val_gen);
+            printf("\n");
+        }
+        if(cc==0){
+            printf("\033[0;31m");
+            for(x=0;x<8;x++){
+                printf("| char ");
+                printf("  freq ");
+                printf("     %% |");
+            }
+            printf("\033[0m");
+            printf("\n");
+            r_stampa_tutto(val_gen);
+        }
     }
+
+    //
+    //stampa tabelle file singoli
+    //
+    if(contr_arg[F]==1){
+        for(x=0;x<ct;x++){
+            printf("\033[0;31m");
+            printf("%s\n",files[x]);
+            printf("\033[0m");
+            int cc=0;
+            if(contr_arg[C]==1){
+                cc=1;
+                printf("consonanti\n");
+                r_stampa_consonanti(val_per_file[x]);
+                printf("\n");
+            }
+            if(contr_arg[V]==1){
+                cc=1;
+                printf("vocali\n");
+                r_stampa_vocali(val_per_file[x]);
+                printf("\n");
+            }
+            if(contr_arg[N]==1){
+                cc=1;
+                printf("numeri\n");
+                r_stampa_numeri(val_per_file[x]);
+                printf("\n");
+            }
+            if(contr_arg[P]==1){
+                cc=1;
+                printf("punteggiatura\n");
+                r_stampa_punteggiatura(val_per_file[x]);
+                printf("\n");
+            }
+            if(cc==0){
+                r_stampa_tutto(val_per_file[x]);
+            }
+
+        }
+    }
+
     close(finput);
     return 0;
 }

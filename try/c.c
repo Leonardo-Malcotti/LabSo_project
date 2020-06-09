@@ -265,6 +265,12 @@ int main(int argc, char *argv[]) {
         int stat[8]={[0 ... 7]=0};
         char parole[8][20]={"TOTALE","MAIUSCOLE","MINUSCOLE","CONSONANTI","VOCALI","PUNTEGGIATURA","SPECIALI","NUMERI"};
 
+        //stampo come primo valore la quantità di file analizzati
+        char * nn = (char *)calloc(int_len(ct)+1,sizeof(char));
+        sprintf(nn,"%d\n",ct);
+        write(ctr,nn,strlen(nn));
+        free(nn);
+
         //calcola le ricorrenze per tipo di carattere
         for(j=0;j<N_CARATTERI;j++){
             char_type(stat,caratteri,j);
@@ -272,15 +278,15 @@ int main(int argc, char *argv[]) {
 
         for(j=0;j<N_CARATTERI;j++){
             char *line=(char *)calloc(int_len(j)+int_len(caratteri[j])+13,sizeof(char));
-            double perc = (stat[TOTALE]==0)? 0.0 : ((double)caratteri[j]/stat[TOTALE])*100.0;
-            sprintf(line,"%d %d %3.2f\n",j,caratteri[j],perc);
+            //double perc = (stat[TOTALE]==0)? 0.0 : ((double)caratteri[j]/stat[TOTALE])*100.0;
+            sprintf(line,"%d %d\n",j,caratteri[j]);
             write(ctr,line,strlen(line));
             free(line);
         }
         for(i=0;i<8;i++){
             char *parola=(char*)calloc(20+int_len(stat[i])+13,sizeof(char));
-            double perc = (stat[TOTALE]==0)? 0.0 : ((double)stat[i]/stat[TOTALE])*100.0;
-            sprintf(parola,"%s %d %3.2f\n",parole[i],stat[i],perc);
+            //double perc = (stat[TOTALE]==0)? 0.0 : ((double)stat[i]/stat[TOTALE])*100.0;
+            sprintf(parola,"%s %d\n",parole[i],stat[i]);
             write(ctr,parola,strlen(parola));
             free(parola);
         }
@@ -301,15 +307,15 @@ int main(int argc, char *argv[]) {
 
             for(j=0;j<N_CARATTERI;j++){
                 char *line=(char *)calloc(int_len(j)+int_len(val_per_file[i][j])+13,sizeof(char));
-                double perc = (stat[TOTALE]==0)? 0.0 : ((double)val_per_file[i][j]/stat[TOTALE])*100.0;
-                sprintf(line,"%d %d %3.2f\n",j,val_per_file[i][j],perc);
+                //double perc = (stat[TOTALE]==0)? 0.0 : ((double)val_per_file[i][j]/stat[TOTALE])*100.0;
+                sprintf(line,"%d %d\n",j,val_per_file[i][j]);
                 write(ctr,line,strlen(line));
                 free(line);
             }
             for(j=0;j<8;j++){
                 char *parola=(char*)calloc(20+int_len(stat[j])+13,sizeof(char));
-                double perc = (stat[TOTALE]==0)? 0 : ((double)stat[j]/stat[TOTALE])*100.0;
-                sprintf(parola,"%s %d %3.2f\n",parole[j],stat[j],perc);
+                //double perc = (stat[TOTALE]==0)? 0 : ((double)stat[j]/stat[TOTALE])*100.0;
+                sprintf(parola,"%s %d\n",parole[j],stat[j]);
                 write(ctr,parola,strlen(parola));
                 free(parola);
             }

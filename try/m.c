@@ -148,6 +148,36 @@ int main(int argc, char *argv[]) {
         }
 
         if(strcmp(s,"r")==0){
+            char *in=(char*)calloc(PATH_MAX,sizeof(char));
+            strcpy(in,"not q");
+            int arg_par[4]={0,0,0,0};
+            printf("\n  inserire i filtri del report\n");
+            printf("  c, consonanti -> visualizza la tabella delle consonanti\n");
+            printf("  v, vocali -> visualizza la tabella delle vocali\n");
+            printf("  n, numeri -> visualizza la tabella dei numeri\n");
+            printf("  p, consonanti -> visualizza la tabella della punteggiatura\n");
+            printf("  inserire nuovamente un parametro per toglierlo\n\n");
+
+            while(strcmp(in,"")!=0){
+                printf("> ");
+                in = read_input();
+                if(strcmp(in,"")!=0){
+                    if(strcmp(in,"c")==0){
+                        arg_par[0]=(arg_par[0]==0)? 1 : 0;
+                    }else if(strcmp(in,"v")==0){
+                        arg_par[1]=(arg_par[1]==0)? 1 : 0;
+                    }
+                    else if(strcmp(in,"n")==0){
+                        arg_par[2]=(arg_par[2]==0)? 1 : 0;
+                    }
+                    else if(strcmp(in,"p")==0){
+                        arg_par[3]=(arg_par[3]==0)? 1 : 0;
+                    } else {
+                        printf("\n  il parametro inserito non è stato riconosciuto\n\n");
+                    }
+                }
+            }
+
             int pip_f[2];
             int cont=0;
             pipe(pip_f);
@@ -155,7 +185,6 @@ int main(int argc, char *argv[]) {
             printf("  non specificare file per avere il report generale\n");
             printf("  lasciare la riga vuota per terminare\n\n");
 
-            char *in=(char*)calloc(PATH_MAX,sizeof(char));
             strcpy(in,"not q");
             while(strcmp(in,"")!=0){
                 printf("> ");
@@ -170,13 +199,31 @@ int main(int argc, char *argv[]) {
             close(pip_f[WRITE_P]);
 
             if(cont!=0){
-
-                char ** argv_c =(char **)calloc((cont+3),sizeof(char)*PATH_MAX);
+                int indice;
+                char ** argv_c =(char **)calloc((cont+8),sizeof(char)*PATH_MAX);
                 argv_c[0]="r";
-                argv_c[1]="-f";
+                argv_c[1]="-g";
+                indice=2;
+                if(arg_par[0]==1){
+                    argv_c[indice]="-c";
+                    indice++;
+                }
+                if(arg_par[1]==1){
+                    argv_c[indice]="-v";
+                    indice++;
+                }
+                if(arg_par[2]==1){
+                    argv_c[indice]="-n";
+                    indice++;
+                }
+                if(arg_par[3]==1){
+                    argv_c[indice]="-p";
+                    indice++;
+                }
+                argv_c[indice]="-f";
+                indice++;
 
-
-                for(i=2;i<cont+3;i++){
+                for(i=indice;i<cont+indice+2;i++){
                     int len=0;
                     char * str_tmp = (char *)calloc(PATH_MAX,sizeof(char));
                     int contr = read_until_char(pip_f[READ_P],'\n',str_tmp,&len);
@@ -186,18 +233,43 @@ int main(int argc, char *argv[]) {
                     free(str_tmp);
                 }
                 close(pip_f[READ_P]);
-                argv_c[cont+2]=(char *)NULL;
+                argv_c[cont+indice]=(char *)NULL;
                 int id = fork();
 
                 if(id==0){
                     execvp("./r",(char *const*)argv_c);
                     return -1;
+                }else {
+                    wait(NULL);
                 }
             } else {
                 int id = fork();
                 if(id==0){
-                    execlp("./r","r",NULL);
+                    int indice;
+                    char ** argv_c =(char **)calloc((cont+8),sizeof(char)*PATH_MAX);
+                    argv_c[0]="r";
+                    indice=1;
+                    if(arg_par[0]==1){
+                        argv_c[indice]="-c";
+                        indice++;
+                    }
+                    if(arg_par[1]==1){
+                        argv_c[indice]="-v";
+                        indice++;
+                    }
+                    if(arg_par[2]==1){
+                        argv_c[indice]="-n";
+                        indice++;
+                    }
+                    if(arg_par[3]==1){
+                        argv_c[indice]="-p";
+                        indice++;
+                    }
+                    argv_c[cont+indice]=(char *)NULL;
+                    execvp("./r",(char *const*)argv_c);
                     return -1;
+                } else {
+                    wait(NULL);
                 }
             }
             cmd_valido=1;

@@ -66,6 +66,20 @@ int int_len(int arg);
 //aggiorna il valore di stat in base al carattere
 void char_type(int *stat,int *caratteri,int j);
 
+int is_min(char j);
+
+int ret_char_type(char j);
+
+void r_stampa_tutto(int *valori);
+
+void r_stampa_consonanti(int *valori);
+
+void r_stampa_vocali(int *valori);
+
+void r_stampa_numeri(int *valori);
+
+void r_stampa_punteggiatura(int *valori);
+
 #define ARG_N 0
 #define ARG_M 1
 #define ARG_F 2
