@@ -262,10 +262,37 @@ int main(int argc, char *argv[]) {
         }
 
         int ctr = open("report.txt",O_WRONLY|O_CREAT,S_IRWXU);
-
+        int stat[8]={[0 ... 7]=0};
+        char parole[8][20]={"TOTALE","MAIUSCOLE","MINUSCOLE","CONSONANTI","VOCALI","PUNTEGGIATURA","SPECIALI","NUMERI"};
         for(j=0;j<N_CARATTERI;j++){
-            char *line=(char *)calloc(int_len(j)+int_len(caratteri[j])+2,sizeof(char));
-            sprintf(line,"%d %d\n",j,caratteri[j]);
+          stat[0]+=caratteri[j];
+          if((j<=90 && j>=65)||(j<=122 && j>=97))
+          {
+            if(j==65 ||j==69 ||j==73 ||j==78 ||j==85 ||j==97 ||j==101 ||j==105 ||j==111||j==117){
+              stat[4]+=caratteri[j];
+            }
+            else{
+              stat[3]+=caratteri[j];
+            }
+            if(j<=90 && j>=65){
+              stat[1]+=caratteri[j];
+            }else{
+              stat[2]+=caratteri[j];
+            }
+          }
+          else if(j==','||j=='.'||j==';'||j==':'||j=='?'||j=='!'||j=='"'){
+            stat[5]+=caratteri[j];
+          }
+          else if(j<=57 && j>=48){
+           stat[7]+=caratteri[j];
+          }
+          else{
+            stat[6]+=caratteri[j];
+          }
+        }
+        for(j=0;j<N_CARATTERI;j++){
+            char *line=(char *)calloc(int_len(j)+int_len(caratteri[j])+13,sizeof(char));
+            sprintf(line,"%d %d %f\n",j,caratteri[j],caratteri[j]/stat[0]*100.0);
             write(ctr,line,strlen(line));
             free(line);
             /*
@@ -282,15 +309,55 @@ int main(int argc, char *argv[]) {
             free(ricc);
             */
         }
+        for(i=0;i<8;i++){
+          char *parola=(char*)calloc(20+int_len(stat[i])+13,sizeof(char));
+          sprintf(parola,"%s %d %f\n",parole[i],stat[i],stat[i]/stat[0]*100.0);
+          write(ctr,parola,strlen(parola));
+          free(parola);
+          stat[i]=0;
+        }
 
         for(i=0;i<ct;i++){
             write(ctr,files[i],strlen(files[i]));
             write(ctr,"\n",strlen("\n"));
             for(j=0;j<N_CARATTERI;j++){
-                char *line=(char *)calloc(int_len(j)+int_len(val_per_file[i][j])+2,sizeof(char));
-                sprintf(line,"%d %d\n",j,val_per_file[i][j]);
+              stat[0]+=val_per_file[i][j];
+              if((j<=90 && j>=65)||(j<=122 && j>=97))
+              {
+                if(j==65 ||j==69 ||j==73 ||j==78 ||j==85 ||j==97 ||j==101 ||j==105 ||j==111||j==117){
+                  stat[4]+=val_per_file[i][j];
+                }
+                else{
+                  stat[3]+=val_per_file[i][j];
+                }
+                if(j<=90 && j>=65){
+                  stat[1]+=val_per_file[i][j];
+                }else{
+                  stat[2]+=val_per_file[i][j];
+                }
+              }
+              else if(j==','||j=='.'||j==';'||j==':'||j=='?'||j=='!'||j=='"'){
+                stat[5]+=val_per_file[i][j];
+              }
+              else if(j<=57 && j>=48){
+               stat[7]+=val_per_file[i][j];
+              }
+              else{
+                stat[6]+=val_per_file[i][j];
+              }
+            }
+            for(j=0;j<N_CARATTERI;j++){
+                char *line=(char *)calloc(int_len(j)+int_len(val_per_file[i][j])+13,sizeof(char));
+                sprintf(line,"%d %d %f\n",j,val_per_file[i][j],val_per_file[i][j]/stat[0]*100.0);
                 write(ctr,line,strlen(line));
                 free(line);
+            }
+            for(i=0;i<8;i++){
+              char *parola=(char*)calloc(20+int_len(stat[i])+13,sizeof(char));
+              sprintf(parola,"%s %d %f\n",parole[i],stat[i],stat[i]/stat[0]*100.0);
+              write(ctr,parola,strlen(parola));
+              free(parola);
+              stat[i]=0;
             }
         }
         close(ctr);
