@@ -63,6 +63,8 @@ char * read_input();
 //funzione di comode per sapere quante cifre ha un numero intero positivo
 int int_len(int arg);
 
+//aggiorna il valore di stat in base al carattere
+void char_type(int *stat,int *caratteri,int j);
 
 #define ARG_N 0
 #define ARG_M 1
@@ -76,5 +78,15 @@ int int_len(int arg);
 #define COSTANTE_LIMITE_TEMPORANEA 100
 #define BUFFER_IN_LEN 256
 #define N_CARATTERI 128
+
+#define TOTALE 0
+#define MAIUSCOLE 1
+#define MINUSCOLE 2
+#define CONSONANTI 3
+#define VOCALI 4
+#define PUNTEGGIATURA 5
+#define SPECIALI 6
+#define NUMERI 7
+
 
 #endif
