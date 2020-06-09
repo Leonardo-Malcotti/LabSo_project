@@ -291,6 +291,7 @@ int main(int argc, char *argv[]) {
 
         for(i=0;i<ct;i++){
             //calcola le ricorrenze per tipo di carattere
+
             for(j=0;j<N_CARATTERI;j++){
                 char_type(stat,val_per_file[i],j);
             }
@@ -305,17 +306,17 @@ int main(int argc, char *argv[]) {
                 write(ctr,line,strlen(line));
                 free(line);
             }
-            for(i=0;i<8;i++){
-                char *parola=(char*)calloc(20+int_len(stat[i])+13,sizeof(char));
-                double perc = (stat[TOTALE]==0)? 0 : ((double)stat[i]/stat[TOTALE])*100.0;
-                sprintf(parola,"%s %d %3.2f\n",parole[i],stat[i],perc);
+            for(j=0;j<8;j++){
+                char *parola=(char*)calloc(20+int_len(stat[j])+13,sizeof(char));
+                double perc = (stat[TOTALE]==0)? 0 : ((double)stat[j]/stat[TOTALE])*100.0;
+                sprintf(parola,"%s %d %3.2f\n",parole[j],stat[j],perc);
                 write(ctr,parola,strlen(parola));
                 free(parola);
             }
 
             //azzera le statistiche
-            for(i=0;i<8;i++){
-                stat[i]=0;
+            for(j=0;j<8;j++){
+                stat[j]=0;
             }
         }
         close(ctr);
