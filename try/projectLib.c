@@ -345,3 +345,31 @@ int int_len(int arg){
     }
     return ret;
 }
+
+
+void char_type(int *stat,int *caratteri,int j){
+    stat[TOTALE]+=caratteri[j];
+    if((j<=90 && j>=65)||(j<=122 && j>=97))
+    {
+      if(j==65 ||j==69 ||j==73 ||j==78 ||j==85 ||j==97 ||j==101 ||j==105 ||j==111||j==117){
+        stat[VOCALI]+=caratteri[j];
+      }
+      else{
+        stat[CONSONANTI]+=caratteri[j];
+      }
+      if(j<=90 && j>=65){
+        stat[MAIUSCOLE]+=caratteri[j];
+      }else{
+        stat[MINUSCOLE]+=caratteri[j];
+      }
+    }
+    else if(j==','||j=='.'||j==';'||j==':'||j=='?'||j=='!'||j=='"'){
+      stat[PUNTEGGIATURA]+=caratteri[j];
+    }
+    else if(j<=57 && j>=48){
+     stat[NUMERI]+=caratteri[j];
+    }
+    else{
+      stat[SPECIALI]+=caratteri[j];
+    }
+}
