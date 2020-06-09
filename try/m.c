@@ -147,6 +147,63 @@ int main(int argc, char *argv[]) {
             cmd_valido=1;
         }
 
+        if(strcmp(s,"r")==0){
+            int pip_f[2];
+            int cont=0;
+            pipe(pip_f);
+            printf("\n  elencare i file di cui avere il report\n");
+            printf("  non specificare file per avere il report generale\n");
+            printf("  lasciare la riga vuota per terminare\n\n");
+
+            char *in=(char*)calloc(PATH_MAX,sizeof(char));
+            strcpy(in,"not q");
+            while(strcmp(in,"")!=0){
+                printf("> ");
+                in = read_input();
+                if(strcmp(in,"")!=0){
+                    write(pip_f[WRITE_P],in,strlen(in));
+                    write(pip_f[WRITE_P],"\n",1);
+                    cont++;
+                }
+            }
+            free(in);
+            close(pip_f[WRITE_P]);
+
+            if(cont!=0){
+
+                char ** argv_c =(char **)calloc((cont+3),sizeof(char)*PATH_MAX);
+                argv_c[0]="r";
+                argv_c[1]="-f";
+
+
+                for(i=2;i<cont+3;i++){
+                    int len=0;
+                    char * str_tmp = (char *)calloc(PATH_MAX,sizeof(char));
+                    int contr = read_until_char(pip_f[READ_P],'\n',str_tmp,&len);
+                    if(contr>=0){
+                        argv_c[i]=strdup(str_tmp);
+                    }
+                    free(str_tmp);
+                }
+                close(pip_f[READ_P]);
+                argv_c[cont+2]=(char *)NULL;
+                int id = fork();
+
+                if(id==0){
+                    execvp("./r",(char *const*)argv_c);
+                    return -1;
+                }
+            } else {
+                int id = fork();
+                if(id==0){
+                    execlp("./r","r",NULL);
+                    return -1;
+                }
+            }
+            cmd_valido=1;
+
+        }
+
         //comandi contratti per la modifica di n o m
         if(strlen(s)>=3 && cmd_valido==0){
             if(s[0]=='n' && s[1]==' '){
