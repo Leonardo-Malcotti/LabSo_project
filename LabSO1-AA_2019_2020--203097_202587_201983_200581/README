@@ -1,0 +1,15 @@
+LabSO1-AA_2019_2020--203097_202587_201983_200581
+
+andrea.lovo@studenti.unitn.it
+
+Andrea Lovo 202587 andrea.lovo@studenti.unitn.it
+Leonardo Javier Malcotti 203097 leonardo.malcotti@studenti.unitn.it
+Francesca Elipanni 201983 francesca.elipanni@studenti.unitn.it
+Filippo Fanton 200581 filippo.fanton@studenti.unitn.it
+
+Avviare m per utilizzare il main
+
+La soluzione avvia un albero di processi composto da c, p e q per anailizzare i file specificati attraverso il main (o il parametro -f di c) creando un file report.txt con i risultati, consultabile con l'ausilio di r (avviabile dal main).
+
+Il programma può analizzare solo file nella stessa directory dell'eseguibile.
+Specificando un valore di n o m (o combinazione dei due) superiore a 200 il comportamento del processo non è definito.
